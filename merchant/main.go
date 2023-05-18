@@ -91,6 +91,7 @@ func (s *server) GetMerchant(ctx context.Context, req *pb.GetMerchantRequest) (*
 		Id:       merchant.ID.String(),
 		Username: merchant.Username,
 		Password: merchant.Password,
+		Name:     merchant.Name,
 		Active:   merchant.Active,
 		MaxQps:   int32(merchant.MaxQPS),
 	}, nil

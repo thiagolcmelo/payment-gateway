@@ -20,8 +20,9 @@ message GetMerchantResponse {
     string id = 1;
 	string username = 2;
 	string password = 3;
-	bool active = 4;
-	int32 max_qps = 5;
+    string name = 4;
+	bool active = 5;
+	int32 max_qps = 6;
 }
 
 message GetQPSRequest {

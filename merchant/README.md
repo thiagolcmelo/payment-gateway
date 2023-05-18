@@ -7,6 +7,7 @@ A **Merchant** is modeled here as follows:
 - `ID`:       **string**
 - `Username`: **string**, unique, not null
 - `Password`: **string**, not null, encrypted before storage
+- `Name`: **string**, not null
 - `Active`:   **bool**
 - `MaxQPS`:   **int**, greater or equal to zero
 
@@ -57,6 +58,7 @@ $ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:
   "id": "e1211351-bb91-441f-9ea0-3b243189dec6",
   "username": "merchant0",
   "password": "$2a$10$TfTXwd7PA.rUrioJrkPbEutsp8WxvJrFDPfOgtTRwolNN3O7m0zKS",
+  "name": "Merchant 0 Ltd.",
   "active": true,
   "maxQps": 100
 }

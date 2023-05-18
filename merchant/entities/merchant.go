@@ -8,8 +8,10 @@ import (
 )
 
 var (
-	// ErrUsernameOrPasswordEmpty must be used when username or password are empty
+	// ErrUsernameOrPasswordEmpty must be used when username or password is empty
 	ErrUsernameOrPasswordEmpty = errors.New("username or password empty")
+	// ErrNameEmpty must be used when name is empty
+	ErrNameEmpty = errors.New("name empty")
 	// ErrMaxQPSCannotBeNegative must be used when MaxQPS is negative
 	ErrMaxQPSCannotBeNegative = errors.New("max qps cannot be negative")
 )
@@ -19,6 +21,7 @@ type Merchant struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
 	Password string    `json:"password"`
+	Name     string    `json:"name"`
 	Active   bool      `json:"active"`
 	MaxQPS   int       `json:"max_qps"`
 }
@@ -31,14 +34,18 @@ func (m Merchant) Validate() error {
 	if m.Username == "" || m.Password == "" {
 		return ErrUsernameOrPasswordEmpty
 	}
+	if m.Name == "" {
+		return ErrNameEmpty
+	}
 	return nil
 }
 
 // NewMerchant is a factory for Merchant
-func NewMerchant(username, password string, active bool, maxQPS int) (Merchant, error) {
+func NewMerchant(username, password, name string, active bool, maxQPS int) (Merchant, error) {
 	merchant := Merchant{
 		Username: username,
 		Password: password,
+		Name:     name,
 		Active:   active,
 		MaxQPS:   maxQPS,
 	}

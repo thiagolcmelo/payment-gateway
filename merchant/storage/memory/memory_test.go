@@ -13,7 +13,7 @@ import (
 func TestMemoryStorage_ReadMerchant(t *testing.T) {
 	ms := memory.NewMemoryStorage()
 
-	merchant, err := entity.NewMerchant("username0", "password0", true, 100)
+	merchant, err := entity.NewMerchant("username0", "password0", "user 0", true, 100)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,6 +33,7 @@ func TestMemoryStorage_ReadMerchant(t *testing.T) {
 		id          uuid.UUID
 		username    string
 		password    string
+		name        string
 		active      bool
 		maxQPS      int
 		ms          *memory.Storage
@@ -45,6 +46,7 @@ func TestMemoryStorage_ReadMerchant(t *testing.T) {
 			id:          validId,
 			username:    "username0",
 			password:    "password0",
+			name:        "user 0",
 			active:      true,
 			maxQPS:      100,
 			ms:          ms,
@@ -73,6 +75,10 @@ func TestMemoryStorage_ReadMerchant(t *testing.T) {
 				t.Errorf("expected Username=%s, got %s", tc.username, actualMerchant.Username)
 			}
 
+			if tc.name != actualMerchant.Name {
+				t.Errorf("expected Name=%s, got %s", tc.name, actualMerchant.Name)
+			}
+
 			if tc.active != actualMerchant.Active {
 				t.Errorf("expected Active=%v, got %v", tc.active, actualMerchant.Active)
 			}
@@ -92,7 +98,7 @@ func TestMemoryStorage_ReadMerchant(t *testing.T) {
 func TestMemoryStorage_CreateMerchant(t *testing.T) {
 	ms := memory.NewMemoryStorage()
 
-	merchant, err := entity.NewMerchant("username0", "password0", true, 100)
+	merchant, err := entity.NewMerchant("username0", "password0", "user 0", true, 100)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,6 +113,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 		id          uuid.UUID
 		username    string
 		password    string
+		name        string
 		active      bool
 		maxQPS      int
 		ms          *memory.Storage
@@ -119,6 +126,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "username",
 			password:    "password1",
+			name:        "user",
 			active:      true,
 			maxQPS:      100,
 			ms:          memory.NewMemoryStorage(),
@@ -129,6 +137,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "username",
 			password:    "password1",
+			name:        "user",
 			active:      false,
 			maxQPS:      100,
 			ms:          memory.NewMemoryStorage(),
@@ -139,6 +148,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "username",
 			password:    "password1",
+			name:        "user",
 			active:      false,
 			maxQPS:      0,
 			ms:          memory.NewMemoryStorage(),
@@ -149,6 +159,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "",
 			password:    "password1",
+			name:        "user",
 			active:      true,
 			maxQPS:      100,
 			ms:          memory.NewMemoryStorage(),
@@ -159,16 +170,29 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "username1",
 			password:    "",
+			name:        "user",
 			active:      true,
 			maxQPS:      100,
 			ms:          memory.NewMemoryStorage(),
 			expectedErr: entity.ErrUsernameOrPasswordEmpty,
 		},
 		{
+			testName:    "create_merchant_with_invalid_name",
+			id:          uuid.Nil,
+			username:    "username1",
+			password:    "password1",
+			name:        "",
+			active:      true,
+			maxQPS:      100,
+			ms:          memory.NewMemoryStorage(),
+			expectedErr: entity.ErrNameEmpty,
+		},
+		{
 			testName:    "create_merchant_with_negative_qps",
 			id:          uuid.Nil,
 			username:    "username1",
 			password:    "password1",
+			name:        "user",
 			active:      true,
 			maxQPS:      -100,
 			ms:          memory.NewMemoryStorage(),
@@ -179,6 +203,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.Nil,
 			username:    "username0",
 			password:    "password",
+			name:        "user",
 			active:      true,
 			maxQPS:      100,
 			ms:          ms,
@@ -189,6 +214,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 			id:          uuid.New(),
 			username:    "username",
 			password:    "password",
+			name:        "user",
 			active:      true,
 			maxQPS:      100,
 			ms:          memory.NewMemoryStorage(),
@@ -202,6 +228,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 				ID:       tc.id,
 				Username: tc.username,
 				Password: tc.password,
+				Name:     tc.name,
 				Active:   tc.active,
 				MaxQPS:   tc.maxQPS,
 			})
@@ -224,7 +251,7 @@ func TestMemoryStorage_CreateMerchant(t *testing.T) {
 func TestMemoryStorage_FindMerchantID(t *testing.T) {
 	ms := memory.NewMemoryStorage()
 
-	merchant, err := entity.NewMerchant("username0", "password0", true, 100)
+	merchant, err := entity.NewMerchant("username0", "password0", "user", true, 100)
 	if err != nil {
 		t.Fatal(err)
 	}

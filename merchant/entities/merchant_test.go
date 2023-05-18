@@ -13,6 +13,7 @@ func TestMechant_NewMerchant(t *testing.T) {
 		testName    string
 		username    string
 		password    string
+		name        string
 		active      bool
 		maxQPS      int
 		expectedErr error
@@ -23,6 +24,7 @@ func TestMechant_NewMerchant(t *testing.T) {
 			testName:    "valid",
 			username:    "username0",
 			password:    "password0",
+			name:        "merchant 0",
 			active:      true,
 			maxQPS:      100,
 			expectedErr: nil,
@@ -31,6 +33,7 @@ func TestMechant_NewMerchant(t *testing.T) {
 			testName:    "empty_username",
 			username:    "",
 			password:    "password0",
+			name:        "merchant 0",
 			active:      true,
 			maxQPS:      100,
 			expectedErr: entity.ErrUsernameOrPasswordEmpty,
@@ -39,14 +42,25 @@ func TestMechant_NewMerchant(t *testing.T) {
 			testName:    "empty_password",
 			username:    "username0",
 			password:    "",
+			name:        "merchant 0",
 			active:      true,
 			maxQPS:      100,
 			expectedErr: entity.ErrUsernameOrPasswordEmpty,
 		},
 		{
+			testName:    "empty_name",
+			username:    "username0",
+			password:    "password0",
+			name:        "",
+			active:      true,
+			maxQPS:      100,
+			expectedErr: entity.ErrNameEmpty,
+		},
+		{
 			testName:    "negative_qps",
 			username:    "username0",
 			password:    "password0",
+			name:        "merchant 0",
 			active:      true,
 			maxQPS:      -100,
 			expectedErr: entity.ErrMaxQPSCannotBeNegative,
@@ -55,7 +69,7 @@ func TestMechant_NewMerchant(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			actualMerchant, err := entity.NewMerchant(tc.username, tc.password, tc.active, tc.maxQPS)
+			actualMerchant, err := entity.NewMerchant(tc.username, tc.password, tc.name, tc.active, tc.maxQPS)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected %v, got %v", tc.expectedErr, err)
 			}
@@ -66,6 +80,10 @@ func TestMechant_NewMerchant(t *testing.T) {
 
 			if tc.username != actualMerchant.Username {
 				t.Errorf("expected Username=%s, got %s", tc.username, actualMerchant.Username)
+			}
+
+			if tc.name != actualMerchant.Name {
+				t.Errorf("expected Name=%s, got %s", tc.name, actualMerchant.Name)
 			}
 
 			if tc.active != actualMerchant.Active {
