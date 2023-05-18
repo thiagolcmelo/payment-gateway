@@ -22,3 +22,6 @@ go.work
 
 # Apple
 .DS_Store
+
+# test coverage
+*coverage.out

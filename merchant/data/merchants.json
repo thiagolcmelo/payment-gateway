@@ -1,0 +1,37 @@
+[
+    {
+        "id": "e1211351-bb91-441f-9ea0-3b243189dec6",
+        "username": "merchant0",
+        "password": "$2a$10$TfTXwd7PA.rUrioJrkPbEutsp8WxvJrFDPfOgtTRwolNN3O7m0zKS",
+        "active": true,
+        "max_qps": 100
+    },
+    {
+        "id": "1a790093-590e-4d97-a51a-32eac2aa4212",
+        "username": "merchant1",
+        "password": "$2a$10$7/nBfUDlxBpUAeA1zGV/fu1UBGBtiaWJM/hyvxeGPT3F2TjCtRlCO",
+        "active": false,
+        "max_qps": 100
+    },
+    {
+        "id": "84a8cb14-0e7b-43f5-8ec7-0840147d3d47",
+        "username": "merchant2",
+        "password": "$2a$10$.JwtEnpl77McwoPUhqfJ..3RITdM.qVG2CJo4sGJP5/XYXDtJcwve",
+        "active": true,
+        "max_qps": 0
+    },
+    {
+        "id": "54c5b126-9a3b-4ecc-9590-e8bc5e9bd069",
+        "username": "merchant3",
+        "password": "$2a$10$bDK82R1.wCZrcLsmj6HDAO2zegQX2VRCqeGwhyOlgDeC2B3DPuOZ.",
+        "active": true,
+        "max_qps": 1
+    },
+    {
+        "id": "6c1285c2-f09e-4a9b-8a6c-4d94695c1a15",
+        "username": "merchant4",
+        "password": "$2a$10$qQa0UTwO04173Z9Vh/XWJ.D9XIQtOgo4reD2Zw8cO6MUrZpCQFKI2",
+        "active": true,
+        "max_qps": 10
+    }
+]
