@@ -6,11 +6,18 @@ A **Merchant** is modeled here as follows:
 
 - `ID`:       **string**
 - `Username`: **string**, unique, not null
-- `Password`: **string**, not null
+- `Password`: **string**, not null, encrypted before storage
 - `Active`:   **bool**
-- `MaxQPS`:   **int**, positive
+- `MaxQPS`:   **int**, greater or equal to zero
 
 There is an in memory implementation of a possible `Storage` service that can be used to persist **Merchants** in disk.
+
+The service provides 4 endpoints over gRPC:
+
+- `GetMerchant` to retrieve all the information for a **Merchant** given its `ID`.
+- `GetQPS` to retrieve `MaxQPS` information for a **Merchant** given its `ID`.
+- `MerchantActive` to retrieve `Active` information for a **Merchant** given its `ID`.
+- `MerchantExists` to check if a `Username` and `Password` matches any **Merchant**, if so, its `ID` is returned.
 
 ## Testing
 
