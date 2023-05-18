@@ -1,0 +1,97 @@
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pb/ledger.proto
+// go get -u google.golang.org/grpc
+syntax = "proto3";
+
+package ledger;
+
+option go_package = "github.com/thiagolcmelo/payment-gateway/ledger/pb";
+
+service LedgerService {
+    rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse) {}
+    rpc ReadPayment(ReadPaymentRequest) returns (ReadPaymentResponse) {}
+    rpc UpdatePaymentToPending(UpdatePaymentToPendingRequest) returns (UpdatePaymentToPendingResponse) {}
+    rpc UpdatePaymentToSuccess(UpdatePaymentToSuccessRequest) returns (UpdatePaymentToSuccessResponse) {}
+    rpc UpdatePaymentToFail(UpdatePaymentToFailRequest) returns (UpdatePaymentToFailResponse) {}
+}
+
+message CreditCard {
+    string number = 1;
+	string name = 2;
+	int32 expire_month = 3;
+	int32 expire_year = 4;
+	int32 cvv = 5;
+}
+
+message Payment {
+    string id = 1;
+    string merchant_id = 2;
+	float amount = 3;
+	string currency = 4;
+	string purchase_time_utc = 5;
+	string validation_method  = 6;
+	CreditCard card = 7;
+	string metadata = 8;
+	PaymentStatus status = 9;
+    string bank_payment_id = 10;
+    string bank_request_time_utc = 11;
+    string bank_response_time_utc = 12;
+    string bank_message = 13;
+}
+
+enum PaymentStatus {
+    CREATED = 0;
+    PENDING = 1;
+    SUCCESS = 2;
+    FAIL = 3;
+}
+
+message CreatePaymentRequest {
+    string merchant_id = 1;
+	float amount = 2;
+	string currency = 3;
+	string purchase_time_utc = 4;
+	string validation_method  = 5;
+	CreditCard card = 6;
+	string metadata = 7;
+}
+
+message CreatePaymentResponse {
+    string id = 1;
+}
+
+message ReadPaymentRequest {
+    string id = 1;
+}
+
+message ReadPaymentResponse {
+    Payment payment = 1;
+}
+
+message UpdatePaymentToPendingRequest {
+    string id = 1;
+    string bank_payment_id = 2;
+    string bank_request_time_utc = 3;
+}
+
+message UpdatePaymentToPendingResponse {
+}
+
+message UpdatePaymentToSuccessRequest {
+    string id = 1;
+    string bank_payment_id = 2;
+    string bank_response_time_utc = 3;
+    string bank_message = 4;
+}
+
+message UpdatePaymentToSuccessResponse {
+}
+
+message UpdatePaymentToFailRequest {
+    string id = 1;
+    optional string bank_payment_id = 2;
+    optional string bank_response_time_utc = 3;
+    optional string bank_message = 4;
+}
+
+message UpdatePaymentToFailResponse {
+}
