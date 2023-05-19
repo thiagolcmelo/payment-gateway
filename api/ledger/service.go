@@ -57,7 +57,6 @@ func (ls *LedgerService) CreatePayment(p entities.Payment) (entities.Payment, er
 		return p, err
 	}
 
-	log.Print(resp.Id)
 	id, err := uuid.Parse(resp.Id)
 	if err != nil {
 		log.Printf("error parsing uuid: %v", err)
@@ -212,6 +211,68 @@ func (ls *LedgerService) ReadPayment(id uuid.UUID) (entities.Payment, error) {
 	}, nil
 }
 
-func (ls *LedgerService) FindPaymentIDFromBankID(bankPaymentID uuid.UUID) (uuid.UUID, error) {
-	return uuid.Nil, nil
+func (ls *LedgerService) ReadPaymentUsingBankReference(bankPaymentID uuid.UUID) (entities.Payment, error) {
+	// return entities.Payment{}, nil
+	conn, err := grpc.Dial(ls.address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Printf("ledger service is unreachable at address: %s, %v", ls.address, err)
+		return entities.Payment{}, err
+	}
+	defer conn.Close()
+
+	ledgerClient := rpcLedger.NewLedgerServiceClient(conn)
+
+	req := &rpcLedger.ReadPaymentUsingBankReferenceRequest{
+		Id: bankPaymentID.String(),
+	}
+
+	resp, err := ledgerClient.ReadPaymentUsingBankReference(ls.ctx, req)
+	if err != nil {
+		log.Printf("error reading payment: %v", err)
+		return entities.Payment{}, err
+	}
+
+	merchantID, err := uuid.Parse(resp.Payment.MerchantId)
+	if err != nil {
+		log.Printf("error parsing merchant uuid: %v", err)
+	}
+	paymentID, err := uuid.Parse(resp.Payment.Id)
+	if err != nil {
+		log.Printf("error parsing payment uuid: %v", err)
+	}
+	purchaseTimeUTC, err := time.Parse("2006-01-02T15:04:05.000", resp.Payment.PurchaseTimeUtc)
+	if err != nil {
+		log.Printf("error parsing purchate time: %v", err)
+	}
+	bankRequestTimeUTC, err := time.Parse("2006-01-02T15:04:05.000", resp.Payment.BankRequestTimeUtc)
+	if err != nil {
+		log.Printf("error parsing bank request time: %v", err)
+	}
+	bankResponseTimeUTC, err := time.Parse("2006-01-02T15:04:05.000", resp.Payment.BankResponseTimeUtc)
+	if err != nil {
+		log.Printf("error parsing bank response time: %v", err)
+	}
+	card := entities.CreditCard{
+		Number:      resp.Payment.Card.Number,
+		Name:        resp.Payment.Card.Name,
+		ExpireMonth: int(resp.Payment.Card.ExpireMonth),
+		ExpireYear:  int(resp.Payment.Card.ExpireYear),
+		CVV:         int(resp.Payment.Card.Cvv),
+	}
+
+	return entities.Payment{
+		ID:               paymentID,
+		MerchantID:       merchantID,
+		Amount:           float64(resp.Payment.Amount),
+		Currency:         resp.Payment.Currency,
+		PurchaseTime:     purchaseTimeUTC,
+		ValidationMethod: resp.Payment.ValidationMethod,
+		Card:             card,
+		Metadata:         resp.Payment.Metadata,
+		Status:           fmt.Sprint(entities.PaymentStatus(resp.Payment.Status)),
+		BankPaymentID:    bankPaymentID,
+		BankRequestTime:  bankRequestTimeUTC,
+		BankResponseTime: bankResponseTimeUTC,
+		BankMessage:      resp.Payment.BankMessage,
+	}, nil
 }

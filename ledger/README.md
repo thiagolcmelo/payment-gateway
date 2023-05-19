@@ -4,6 +4,7 @@ It is a conceptual Ledger for storing payments. It exposes the following endpoin
 
 - `CreatePayment` to create a new payment.
 - `ReadPayment` to get all information about a payment.
+- `ReadPaymentUsingBankReference` to get all information about a payment using the bank reference.
 - `UpdatePaymentToPending` to inform that a payment was sent to an **Acquiring Bank**.
 - `UpdatePaymentToSuccess` to inform that a payment was successfully executed by an **Acquiring Bank**.
 - `UpdatePaymentToFail` to set the payment as a failure, if refused by the bank, a message is expected to infrom the reason.

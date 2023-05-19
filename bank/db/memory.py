@@ -264,7 +264,7 @@ class MemoryDB:
                 "message": message,
             }
             r = await client.put(
-                f"http://{host}:8000/payment", json=json_data, timeout=10.0
+                f"http://{host}:8080/payment", json=json_data, timeout=10.0
             )
             r_data = r.json()
 

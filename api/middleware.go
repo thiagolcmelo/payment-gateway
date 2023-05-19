@@ -82,7 +82,7 @@ func restrictMiddleware(c *gin.Context) {
 	// // Get the client's IP address
 	// ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	// if err != nil {
-	// 	log.Println("error getting client ip:", err)
+	// 	log.Printf("error getting client ip: %v", err)
 	// 	c.AbortWithStatus(http.StatusInternalServerError)
 	// 	return
 	// }
@@ -90,7 +90,7 @@ func restrictMiddleware(c *gin.Context) {
 	// // Check if the client's IP is within the allowed network
 	// _, allowedCIDR, err := net.ParseCIDR(allowedNetwork)
 	// if err != nil {
-	// 	log.Println("error verifying ip:", err)
+	// 	log.Printf("error verifying ip: %v", err)
 	// 	c.AbortWithStatus(http.StatusInternalServerError)
 	// 	return
 	// }

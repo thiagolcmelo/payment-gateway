@@ -86,7 +86,7 @@ func createPaymentHandler(c *gin.Context) {
 	ls := ledger.NewLedgerService(c, ledgerAddress)
 	p, err = ls.CreatePayment(p)
 	if err != nil {
-		log.Println("could not create payment:", err)
+		log.Printf("could not create payment: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -94,14 +94,14 @@ func createPaymentHandler(c *gin.Context) {
 	bs := bank.NewBankService(c, bankAddress)
 	p, err = bs.RelayPaymentRequest(m, p)
 	if err != nil {
-		log.Println("could not relay payment to bank:", err)
+		log.Printf("could not relay payment to bank: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	p, err = ls.SetPaymentPending(p)
 	if err != nil {
-		log.Println("could not set payment status to pending in the ledger:", err)
+		log.Printf("could not set payment status to pending in the ledger: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -131,19 +131,14 @@ func updatePaymentHandler(c *gin.Context) {
 	}
 
 	ls := ledger.NewLedgerService(c, ledgerAddress)
-	paymentID, err := ls.FindPaymentIDFromBankID(bankPaymentID)
+	p, err := ls.ReadPaymentUsingBankReference(bankPaymentID)
 	if err != nil {
 		log.Printf("could not find payment: %v", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "invalid bank payment id", "acknowledge": false})
 		return
 	}
-
-	p, err := ls.ReadPayment(paymentID)
-	if err != nil {
-		log.Printf("could not read payment: %v", err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "invalid payment id", "acknowledge": false})
-		return
-	}
+	p.BankResponseTime = time.Now()
+	p.BankMessage = body.Message
 
 	if body.Success {
 		_, err = ls.SetPaymentSuccess(p)

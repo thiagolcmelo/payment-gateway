@@ -2,6 +2,7 @@ from datetime import datetime
 
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response, status
+import httpx
 from pydantic import BaseModel
 
 from db.memory import (
@@ -44,6 +45,39 @@ class UpdatePaymentRequest(BaseModel):
 
 class UpdatePaymentResponse(BaseModel):
     acknowledge: bool
+
+
+async def process_payment(payment_id: int, host: str, db_manager: MemoryDB) -> None:
+    shopper = await db_manager.find_shopper_by_payment_id(payment_id)
+    merchants = await db_manager.find_shopper_merchants(shopper)
+    payment = await db_manager.find_payment_by_id(payment_id)
+
+    success, message = True, "success"
+    if shopper.balance < payment.amount:
+        message = "not enough balance"
+        success = False
+    elif payment.merchant not in merchants:
+        message = "merchant unauthorized"
+        success = False
+
+    async with httpx.AsyncClient() as client:
+        json_data = {
+            "id": payment.uuid_id,
+            "success": success,
+            "message": message,
+        }
+        r = await client.put(
+            f"http://{host}:8080/payment", json=json_data, timeout=10.0
+        )
+        r_data = r.json()
+
+        if r.status_code == httpx.codes.OK and r_data.get("acknowledge", False):
+            await db_manager.decrement_shopper_balance(shopper, payment.amount)
+            await db_manager.mark_payment_status(payment_id, PaymentStatus.SUCCESS)
+            db_manager.logger.info(f"{payment.uuid_id} - SUCCESS")
+        else:
+            await db_manager.mark_payment_status(payment_id, PaymentStatus.FAIL)
+            db_manager.logger.info(f"{payment.uuid_id} - FAIL")
 
 
 app = FastAPI()
@@ -100,7 +134,7 @@ async def create_payment(
             raise Exception(response.message)
 
         background_tasks.add_task(
-            app.state.db_helper.process_payment, payment_id, req.client.host
+            process_payment, payment_id, req.client.host, app.state.db_helper
         )
         await app.state.db_helper.mark_payment_status(payment_id, PaymentStatus.PENDING)
 
