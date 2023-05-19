@@ -11,18 +11,22 @@ import (
 var (
 	// ErrUnknownPayment must be use while trying to read payment with unknown id
 	ErrUnknownPayment = errors.New("there is no payment with given id")
+	// ErrUnknownBankReference must be used when trying to read using unknown bank reference
+	ErrUnknownBankReference = errors.New("unknown bank reference")
 )
 
 // Storage is an in memory implementation of a Ledger to store payments
 type Storage struct {
-	payments map[uuid.UUID]entity.Payment
+	payments       map[uuid.UUID]entity.Payment
+	bankReferences map[uuid.UUID]uuid.UUID
 	sync.RWMutex
 }
 
 // NewMemoryStorage is a factory for in memory Storage for payments
 func NewMemoryStorage() *Storage {
 	return &Storage{
-		payments: make(map[uuid.UUID]entity.Payment),
+		payments:       make(map[uuid.UUID]entity.Payment),
+		bankReferences: make(map[uuid.UUID]uuid.UUID),
 	}
 }
 
@@ -48,6 +52,10 @@ func (l *Storage) Create(p entity.Payment) (uuid.UUID, error) {
 	}
 
 	l.payments[id] = p
+	if p.BankPaymentID != uuid.Nil {
+		l.bankReferences[p.BankPaymentID] = p.ID
+	}
+
 	return id, nil
 }
 
@@ -57,6 +65,24 @@ func (l *Storage) Read(id uuid.UUID) (entity.Payment, error) {
 	defer l.RUnlock()
 
 	payment, ok := l.payments[id]
+	if !ok {
+		return entity.Payment{}, ErrUnknownPayment
+	}
+
+	return payment, nil
+}
+
+// ReadUsingBankReference returns details of a payment in the Ledger using a bank reference
+func (l *Storage) ReadUsingBankReference(id uuid.UUID) (entity.Payment, error) {
+	l.RLock()
+	defer l.RUnlock()
+
+	paymentID, ok := l.bankReferences[id]
+	if !ok {
+		return entity.Payment{}, ErrUnknownBankReference
+	}
+
+	payment, ok := l.payments[paymentID]
 	if !ok {
 		return entity.Payment{}, ErrUnknownPayment
 	}
@@ -79,6 +105,9 @@ func (l *Storage) Update(p entity.Payment) error {
 	}
 
 	l.payments[p.ID] = p
+	if p.BankPaymentID != uuid.Nil {
+		l.bankReferences[p.BankPaymentID] = p.ID
+	}
 
 	return nil
 }

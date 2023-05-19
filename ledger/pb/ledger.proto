@@ -9,6 +9,7 @@ option go_package = "github.com/thiagolcmelo/payment-gateway/ledger/pb";
 service LedgerService {
     rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse) {}
     rpc ReadPayment(ReadPaymentRequest) returns (ReadPaymentResponse) {}
+    rpc ReadPaymentUsingBankReference(ReadPaymentUsingBankReferenceRequest) returns (ReadPaymentUsingBankReferenceResponse) {}
     rpc UpdatePaymentToPending(UpdatePaymentToPendingRequest) returns (UpdatePaymentToPendingResponse) {}
     rpc UpdatePaymentToSuccess(UpdatePaymentToSuccessRequest) returns (UpdatePaymentToSuccessResponse) {}
     rpc UpdatePaymentToFail(UpdatePaymentToFailRequest) returns (UpdatePaymentToFailResponse) {}
@@ -64,6 +65,14 @@ message ReadPaymentRequest {
 }
 
 message ReadPaymentResponse {
+    Payment payment = 1;
+}
+
+message ReadPaymentUsingBankReferenceRequest {
+    string id = 1;
+}
+
+message ReadPaymentUsingBankReferenceResponse {
     Payment payment = 1;
 }
 

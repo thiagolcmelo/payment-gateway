@@ -94,6 +94,44 @@ func (s *server) ReadPayment(ctx context.Context, req *pb.ReadPaymentRequest) (*
 	}, nil
 }
 
+func (s *server) ReadPaymentUsingBankReference(ctx context.Context, req *pb.ReadPaymentUsingBankReferenceRequest) (*pb.ReadPaymentUsingBankReferenceResponse, error) {
+	id, err := uuid.Parse(req.Id)
+	if err != nil {
+		log.Printf("error parsing uuid in ReadPayment: %v", err)
+		return nil, err
+	}
+
+	payment, err := s.storage.ReadUsingBankReference(id)
+	if err != nil {
+		log.Printf("error reading payment in ReadPayment: %v", err)
+		return nil, err
+	}
+
+	return &pb.ReadPaymentUsingBankReferenceResponse{
+		Payment: &pb.Payment{
+			Id:               payment.ID.String(),
+			MerchantId:       payment.MerchantID.String(),
+			Amount:           float32(payment.Amount), // TODO: find better solution
+			Currency:         payment.Currency,
+			PurchaseTimeUtc:  payment.GetPurchaseTimeStr(),
+			ValidationMethod: payment.ValidationMethod,
+			Card: &pb.CreditCard{
+				Number:      payment.Card.Number,
+				Name:        payment.Card.Name,
+				ExpireMonth: int32(payment.Card.ExpireMonth),
+				ExpireYear:  int32(payment.Card.ExpireYear),
+				Cvv:         int32(payment.Card.CVV),
+			},
+			Metadata:            payment.Metadata,
+			Status:              pb.PaymentStatus(payment.Status),
+			BankPaymentId:       payment.BankPaymentID.String(),
+			BankRequestTimeUtc:  payment.GetBankRequestTimeStr(),
+			BankResponseTimeUtc: payment.GetBankResponseTimeStr(),
+			BankMessage:         payment.BankMessage,
+		},
+	}, nil
+}
+
 func (s *server) UpdatePaymentToPending(ctx context.Context, req *pb.UpdatePaymentToPendingRequest) (*pb.UpdatePaymentToPendingResponse, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {

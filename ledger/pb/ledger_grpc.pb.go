@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type LedgerServiceClient interface {
 	CreatePayment(ctx context.Context, in *CreatePaymentRequest, opts ...grpc.CallOption) (*CreatePaymentResponse, error)
 	ReadPayment(ctx context.Context, in *ReadPaymentRequest, opts ...grpc.CallOption) (*ReadPaymentResponse, error)
+	ReadPaymentUsingBankReference(ctx context.Context, in *ReadPaymentUsingBankReferenceRequest, opts ...grpc.CallOption) (*ReadPaymentUsingBankReferenceResponse, error)
 	UpdatePaymentToPending(ctx context.Context, in *UpdatePaymentToPendingRequest, opts ...grpc.CallOption) (*UpdatePaymentToPendingResponse, error)
 	UpdatePaymentToSuccess(ctx context.Context, in *UpdatePaymentToSuccessRequest, opts ...grpc.CallOption) (*UpdatePaymentToSuccessResponse, error)
 	UpdatePaymentToFail(ctx context.Context, in *UpdatePaymentToFailRequest, opts ...grpc.CallOption) (*UpdatePaymentToFailResponse, error)
@@ -49,6 +50,15 @@ func (c *ledgerServiceClient) CreatePayment(ctx context.Context, in *CreatePayme
 func (c *ledgerServiceClient) ReadPayment(ctx context.Context, in *ReadPaymentRequest, opts ...grpc.CallOption) (*ReadPaymentResponse, error) {
 	out := new(ReadPaymentResponse)
 	err := c.cc.Invoke(ctx, "/ledger.LedgerService/ReadPayment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ledgerServiceClient) ReadPaymentUsingBankReference(ctx context.Context, in *ReadPaymentUsingBankReferenceRequest, opts ...grpc.CallOption) (*ReadPaymentUsingBankReferenceResponse, error) {
+	out := new(ReadPaymentUsingBankReferenceResponse)
+	err := c.cc.Invoke(ctx, "/ledger.LedgerService/ReadPaymentUsingBankReference", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +98,7 @@ func (c *ledgerServiceClient) UpdatePaymentToFail(ctx context.Context, in *Updat
 type LedgerServiceServer interface {
 	CreatePayment(context.Context, *CreatePaymentRequest) (*CreatePaymentResponse, error)
 	ReadPayment(context.Context, *ReadPaymentRequest) (*ReadPaymentResponse, error)
+	ReadPaymentUsingBankReference(context.Context, *ReadPaymentUsingBankReferenceRequest) (*ReadPaymentUsingBankReferenceResponse, error)
 	UpdatePaymentToPending(context.Context, *UpdatePaymentToPendingRequest) (*UpdatePaymentToPendingResponse, error)
 	UpdatePaymentToSuccess(context.Context, *UpdatePaymentToSuccessRequest) (*UpdatePaymentToSuccessResponse, error)
 	UpdatePaymentToFail(context.Context, *UpdatePaymentToFailRequest) (*UpdatePaymentToFailResponse, error)
@@ -103,6 +114,9 @@ func (UnimplementedLedgerServiceServer) CreatePayment(context.Context, *CreatePa
 }
 func (UnimplementedLedgerServiceServer) ReadPayment(context.Context, *ReadPaymentRequest) (*ReadPaymentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadPayment not implemented")
+}
+func (UnimplementedLedgerServiceServer) ReadPaymentUsingBankReference(context.Context, *ReadPaymentUsingBankReferenceRequest) (*ReadPaymentUsingBankReferenceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadPaymentUsingBankReference not implemented")
 }
 func (UnimplementedLedgerServiceServer) UpdatePaymentToPending(context.Context, *UpdatePaymentToPendingRequest) (*UpdatePaymentToPendingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePaymentToPending not implemented")
@@ -158,6 +172,24 @@ func _LedgerService_ReadPayment_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LedgerServiceServer).ReadPayment(ctx, req.(*ReadPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LedgerService_ReadPaymentUsingBankReference_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadPaymentUsingBankReferenceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LedgerServiceServer).ReadPaymentUsingBankReference(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ledger.LedgerService/ReadPaymentUsingBankReference",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LedgerServiceServer).ReadPaymentUsingBankReference(ctx, req.(*ReadPaymentUsingBankReferenceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -230,6 +262,10 @@ var LedgerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadPayment",
 			Handler:    _LedgerService_ReadPayment_Handler,
+		},
+		{
+			MethodName: "ReadPaymentUsingBankReference",
+			Handler:    _LedgerService_ReadPaymentUsingBankReference_Handler,
 		},
 		{
 			MethodName: "UpdatePaymentToPending",

@@ -283,6 +283,86 @@ func TestMemoryLedger_Read(t *testing.T) {
 	}
 }
 
+func TestMemoryLedger_ReadUsingBankReference(t *testing.T) {
+	ms := memory.NewMemoryStorage()
+
+	payment, err := entity.NewPayment(
+		uuid.New().String(),
+		150.00,
+		"USD",
+		"2023-05-18T01:00:00.000",
+		"push",
+		entity.CreditCard{
+			Number:      "name surname",
+			Name:        "1111-2222-3333-4444",
+			ExpireMonth: 10,
+			ExpireYear:  2099,
+			CVV:         123,
+		},
+		"shopper-123",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	paymentID, err := ms.Create(payment)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payment, err = ms.Read(paymentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bankPaymentId := uuid.New()
+	payment.BankPaymentID = bankPaymentId
+	err = ms.Update(payment)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type testCase struct {
+		testName        string
+		id              uuid.UUID
+		ms              *memory.Storage
+		expectedPayment entity.Payment
+		expectedErr     error
+	}
+
+	testCases := []testCase{
+		{
+			testName:        "existing_payment_is_found",
+			id:              bankPaymentId,
+			ms:              ms,
+			expectedPayment: payment,
+			expectedErr:     nil,
+		},
+		{
+			testName:        "unexisting_payment_returns_error",
+			id:              uuid.New(),
+			ms:              ms,
+			expectedPayment: entity.Payment{},
+			expectedErr:     memory.ErrUnknownBankReference,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			p, err := tc.ms.ReadUsingBankReference(tc.id)
+			if !errors.Is(err, tc.expectedErr) {
+				t.Errorf("expected %v, got %v", tc.expectedErr, err)
+			}
+
+			if err != nil {
+				return
+			}
+
+			if !tc.expectedPayment.Equal(p) {
+				t.Errorf("expected %v, got %v", tc.expectedPayment, p)
+			}
+		})
+	}
+}
+
 func TestMemoryLedger_Update(t *testing.T) {
 	ms := memory.NewMemoryStorage()
 

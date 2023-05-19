@@ -10,5 +10,6 @@ import (
 type Storage interface {
 	Create(entity.Payment) (uuid.UUID, error)
 	Read(uuid.UUID) (entity.Payment, error)
+	ReadUsingBankReference(uuid.UUID) (entity.Payment, error)
 	Update(entity.Payment) error
 }
