@@ -1,0 +1,93 @@
+[
+    {
+        "name": "shopper 0",
+        "description": "shopper with valid card and large balance in USD",
+        "card": {
+            "number": "1111-2222-3333-4444",
+            "name": "shopper 0",
+            "expire_month": 10,
+            "expire_year": 2050,
+            "cvv": 123
+        },
+        "auto_approve": [
+            "Merchant 0 Ltd.",
+            "Merchant 1 Ltd.",
+            "Merchant 2 Ltd.",
+            "Merchant 3 Ltd.",
+            "Merchant 4 Ltd."
+        ],
+        "currency": "USD",
+        "balance": 1000000.00
+    },
+    {
+        "name": "shopper 1",
+        "description": "shopper with valid card and small balance in USD",
+        "card": {
+            "number": "5555-6666-7777-8888",
+            "name": "shopper 1",
+            "expire_month": 10,
+            "expire_year": 2040,
+            "cvv": 456
+        },
+        "auto_approve": [
+            "Merchant 0 Ltd.",
+            "Merchant 1 Ltd.",
+            "Merchant 2 Ltd."
+        ],
+        "currency": "USD",
+        "balance": 100.00
+    },
+    {
+        "name": "shopper 2",
+        "description": "shopper with valid card and medium balance in USD",
+        "card": {
+            "number": "9999-1010-1111-1212",
+            "name": "shopper 2",
+            "expire_month": 3,
+            "expire_year": 2045,
+            "cvv": 789
+        },
+        "auto_approve": [
+            "Merchant 3 Ltd.",
+            "Merchant 4 Ltd."
+        ],
+        "currency": "USD",
+        "balance": 10000.00
+    },
+    {
+        "name": "shopper 4",
+        "description": "shopper with valid card and large balance in EUR",
+        "card": {
+            "number": "1313-1414-1515-1616",
+            "name": "shopper 5",
+            "expire_month": 1,
+            "expire_year": 2070,
+            "cvv": 987
+        },
+        "auto_approve": [
+            "Merchant 0 Ltd."
+        ],
+        "currency": "EUR",
+        "balance": 1000000.00
+    },
+    {
+        "name": "shopper 5",
+        "description": "shopper with valid card and large balance in GBP",
+        "card": {
+            "number": "1717-1818-1919-2020",
+            "name": "shopper 5",
+            "expire_month": 1,
+            "expire_year": 2070,
+            "cvv": 987
+        },
+        "auto_approve": [
+            "Merchant 0 Ltd.",
+            "Merchant 1 Ltd.",
+            "Merchant 2 Ltd.",
+            "Merchant 3 Ltd.",
+            "Merchant 4 Ltd."
+        ],
+        "currency": "EUR",
+        "balance": 1000000.00
+    }
+]

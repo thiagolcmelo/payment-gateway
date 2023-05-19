@@ -1,0 +1,14 @@
+{
+    "amount": 10.0,
+    "currency": "USD",
+    "purchase_time": "2023-05-18T10:00:00.000",
+    "validation_method": "sms",
+    "card": {
+        "number": "1111-2222-3333-4444",
+        "name": "shopper 0",
+        "expire_month": 10,
+        "expire_year": 2050,
+        "cvv": 123
+    },
+    "merchant": "Merchant 0 Ltd."
+}

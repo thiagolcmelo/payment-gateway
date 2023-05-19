@@ -25,3 +25,8 @@ go.work
 
 # test coverage
 *coverage.out
+
+# python
+*/__pycache__/*
+*/venv/*
+*.pyc
