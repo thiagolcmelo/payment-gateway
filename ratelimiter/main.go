@@ -55,7 +55,7 @@ func (s *server) getMaxQPS(ctx context.Context, id uuid.UUID) (int, error) {
 	merchantReq := &merchant.GetQPSRequest{
 		Id: id.String(),
 	}
-	merchantResp, err := merchantClient.GetQPS(context.Background(), merchantReq)
+	merchantResp, err := merchantClient.GetQPS(ctx, merchantReq)
 	if err != nil {
 		return 0, fmt.Errorf("error reading max qps: %v", err)
 	}
