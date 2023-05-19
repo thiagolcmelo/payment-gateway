@@ -249,14 +249,20 @@ class MemoryDB:
         merchants = await self.find_shopper_merchants(shopper)
         payment = await self.find_payment_by_id(payment_id)
 
-        message = None
+        success, message = True, "success"
         if shopper.balance < payment.amount:
             message = "not enough balance"
+            success = False
         elif payment.merchant not in merchants:
             message = "merchant unauthorized"
+            success = False
 
         async with httpx.AsyncClient() as client:
-            json_data = {"id": payment.uuid_id, "message": message or "success"}
+            json_data = {
+                "id": payment.uuid_id,
+                "success": success,
+                "message": message,
+            }
             r = await client.put(
                 f"http://{host}:8000/payment", json=json_data, timeout=10.0
             )

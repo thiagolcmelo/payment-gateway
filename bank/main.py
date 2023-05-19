@@ -38,6 +38,7 @@ class PaymentResponse(BaseModel):
 
 class UpdatePaymentRequest(BaseModel):
     id: str
+    success: bool
     message: str
 
 
@@ -122,6 +123,7 @@ async def update_payment(
 ) -> UpdatePaymentResponse:
     id = update.id
     message = update.message
-    logger.info(f"acknowledging message: ({id}, {message})")
+    success = update.success
+    logger.info(f"acknowledging message: ({id}, {success}, {message})")
     resp.status_code = status.HTTP_200_OK
     return UpdatePaymentResponse(acknowledge=True)
