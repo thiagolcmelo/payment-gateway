@@ -38,6 +38,7 @@ func (bs *BankService) RelayPaymentRequest(m entities.Merchant, p entities.Payme
 
 	type messageResponse struct {
 		Id      string `json:"id"`
+		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}
 
@@ -81,7 +82,10 @@ func (bs *BankService) RelayPaymentRequest(m entities.Merchant, p entities.Payme
 	// Check the response
 	if resp.StatusCode != http.StatusCreated {
 		log.Printf("error relaying payment to bank, status code: %v (%s)", resp.StatusCode, resp.Status)
-		return p, err
+		// for bad request, it should read the message
+		if resp.StatusCode != http.StatusBadRequest {
+			return p, err
+		}
 	}
 
 	// Read the response body
@@ -99,6 +103,9 @@ func (bs *BankService) RelayPaymentRequest(m entities.Merchant, p entities.Payme
 		return p, err
 	}
 	p.BankMessage = responseData.Message
+	if !responseData.Success {
+		return p, fmt.Errorf("request to bank resulted in: %s", responseData.Message)
+	}
 
 	// Assert reference id is uuid
 	id, err := uuid.Parse(responseData.Id)

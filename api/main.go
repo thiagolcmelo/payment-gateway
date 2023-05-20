@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,6 +58,13 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Authorization", "Content-Type", "Accept", "Access-Control-Allow-Origin"}
+
+	router.Use(cors.New(config))
 
 	router.GET("/login", loginHandler)
 

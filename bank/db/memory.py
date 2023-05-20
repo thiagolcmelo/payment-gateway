@@ -39,6 +39,7 @@ class Payment(BaseModel):
     id: int
     uuid_id: str
     amount: float
+    currency: str
     purchase_time: datetime
     validation_method: str
     card_id: int
@@ -147,7 +148,7 @@ class MemoryDB:
         try:
             cursor = self.conn.cursor()
             cursor.execute(
-                "SELECT id, uuid_id, amount, purchase_time, validation_method, card_id, merchant, shopper_id, created_at, status FROM payments WHERE id=?",
+                "SELECT id, uuid_id, amount, currency, purchase_time, validation_method, card_id, merchant, shopper_id, created_at, status FROM payments WHERE id=?",
                 (payment_id,),
             )
             row = cursor.fetchone()
@@ -156,13 +157,14 @@ class MemoryDB:
                     id=int(row[0]),
                     uuid_id=row[1],
                     amount=float(row[2]),
-                    purchase_time=datetime.strptime(row[3], "%Y%m%dT%H%M%S.%f"),
-                    validation_method=row[4],
-                    card_id=int(row[5]),
-                    merchant=row[6],
-                    shopper_id=int(row[7]),
-                    created_at=datetime.strptime(row[8], "%Y%m%dT%H%M%S.%f"),
-                    status=PaymentStatus(int(row[9])),
+                    currency=row[3],
+                    purchase_time=datetime.strptime(row[4], "%Y%m%dT%H%M%S.%f"),
+                    validation_method=row[5],
+                    card_id=int(row[6]),
+                    merchant=row[7],
+                    shopper_id=int(row[8]),
+                    created_at=datetime.strptime(row[9], "%Y%m%dT%H%M%S.%f"),
+                    status=PaymentStatus(int(row[10])),
                 )
         finally:
             self.database_lock.release()
@@ -201,6 +203,7 @@ class MemoryDB:
         shopper: Shopper,
         card: Card,
         amount: float,
+        currency: str,
         purchase_time: datetime,
         validation_method: str,
         merchant: str,
@@ -214,12 +217,13 @@ class MemoryDB:
             cursor.execute(
                 """
                 INSERT INTO payments
-                    (uuid_id, amount, purchase_time, validation_method, card_id, merchant, shopper_id, created_at, status)
+                    (uuid_id, amount, currency, purchase_time, validation_method, card_id, merchant, shopper_id, created_at, status)
                     VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     str(id),
                     amount,
+                    currency,
                     purchase_time.strftime("%Y%m%dT%H%M%S.%f"),
                     validation_method,
                     card.id,
@@ -243,42 +247,6 @@ class MemoryDB:
             self.database_lock.release()
 
         return payment_id, payment_uuid
-
-    async def process_payment(self, payment_id: int, host: str) -> None:
-        shopper = await self.find_shopper_by_payment_id(payment_id)
-        merchants = await self.find_shopper_merchants(shopper)
-        payment = await self.find_payment_by_id(payment_id)
-
-        success, message = True, "success"
-        if shopper.balance < payment.amount:
-            message = "not enough balance"
-            success = False
-        elif payment.merchant not in merchants:
-            message = "merchant unauthorized"
-            success = False
-
-        async with httpx.AsyncClient() as client:
-            json_data = {
-                "id": payment.uuid_id,
-                "success": success,
-                "message": message,
-            }
-            r = await client.put(
-                f"http://{host}:8080/payment", json=json_data, timeout=10.0
-            )
-            r_data = r.json()
-
-            if (
-                r.status_code == httpx.codes.OK
-                and message is None
-                and r_data.get("acknowledge", False)
-            ):
-                await self.decrement_shopper_balance(shopper, payment.amount)
-                await self.mark_payment_status(payment_id, PaymentStatus.SUCCESS)
-                self.logger.info(f"{payment.uuid_id} - SUCCESS")
-            else:
-                await self.mark_payment_status(payment_id, PaymentStatus.FAIL)
-                self.logger.info(f"{payment.uuid_id} - FAIL")
 
 
 def create_memory_db(json_data: str) -> sqlite3.Connection:
@@ -320,6 +288,7 @@ def create_memory_db(json_data: str) -> sqlite3.Connection:
         id INTEGER PRIMARY KEY,
         uuid_id TEXT,
         amount REAL,
+        currency TEXT,
         purchase_time TEXT,
         validation_method TEXt,
         card_id INTEGER,

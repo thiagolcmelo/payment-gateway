@@ -1,0 +1,107 @@
+.dashboard-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    background-color: #f2f2f2;
+  }
+  
+  .dashboard-title {
+    margin: 0;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logout-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  
+  .logout-button:hover {
+    background-color: #c0392b;
+  }
+
+  .form-container {
+    display: 'flex';
+    flex-direction: 'column';
+    align-items: 'center';
+    padding: '20px';
+    background-color: '#f8f8f8';
+    border: '1px solid #ccc';
+    border-radius: '4px';
+    margin-top: 20px;
+  }
+  
+  .form-input {
+    margin-bottom: 10px;
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+  }
+
+  .form-label {
+    margin-right: 10px;
+  }
+  
+  .submit-button {
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #1a5276;
+  }
+
+  .submission-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .submission-table th,
+  .submission-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .submission-table th {
+    background-color: #f5f5f5;
+  }
+  
+  .submission-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .submission-table button {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submission-table button:hover {
+    background-color: #45a049;
+  }

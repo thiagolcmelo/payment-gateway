@@ -18,6 +18,7 @@ import (
 func loginHandler(c *gin.Context) {
 	username, password, hasAuth := c.Request.BasicAuth()
 	if !hasAuth {
+		log.Printf("username=%s, password=%s", username, password)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing credentials"})
 		return
 	}
@@ -95,18 +96,21 @@ func createPaymentHandler(c *gin.Context) {
 	p, err = bs.RelayPaymentRequest(m, p)
 	if err != nil {
 		log.Printf("could not relay payment to bank: %v", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		p, err = ls.SetPaymentFail(p)
+		if err != nil {
+			log.Printf("could not set payment status to fail in the ledger: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		p, err = ls.SetPaymentPending(p)
+		if err != nil {
+			log.Printf("could not set payment status to pending in the ledger: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
 	}
-
-	p, err = ls.SetPaymentPending(p)
-	if err != nil {
-		log.Printf("could not set payment status to pending in the ledger: %v", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"id": p.ID.String()})
+	c.JSON(http.StatusOK, gin.H{"id": p.ID.String(), "status": p.Status, "bank_message": p.BankMessage})
 }
 
 func updatePaymentHandler(c *gin.Context) {

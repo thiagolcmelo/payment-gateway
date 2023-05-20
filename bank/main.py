@@ -52,12 +52,16 @@ async def process_payment(payment_id: int, host: str, db_manager: MemoryDB) -> N
     merchants = await db_manager.find_shopper_merchants(shopper)
     payment = await db_manager.find_payment_by_id(payment_id)
 
-    success, message = True, "success"
-    if shopper.balance < payment.amount:
-        message = "not enough balance"
-        success = False
-    elif payment.merchant not in merchants:
+    success, message = True, "payment processed successfully"
+    if payment.merchant not in merchants:
+        # merchant first, to not disclose info to unauthorized merchant
         message = "merchant unauthorized"
+        success = False
+    elif shopper.currency != payment.currency:
+        message = "shopper currency is not correct"
+        success = False
+    elif shopper.balance < payment.amount:
+        message = "not enough balance"
         success = False
 
     async with httpx.AsyncClient() as client:
@@ -115,23 +119,20 @@ async def create_payment(
         if shopper is None:
             response.message = "card does not match a shopper"
             raise Exception(response.message)
-        elif shopper.currency != payment_request.currency:
-            response.message = "shopper currency is not correct"
-            raise Exception(response.message)
 
         payment_id, payment_uuid = await app.state.db_helper.create_payment_for_shopper(
             shopper,
             card,
             payment_request.amount,
+            payment_request.currency,
             payment_request.purchase_time,
             payment_request.validation_method,
             payment_request.merchant,
         )
-        logger.info(f"{payment_uuid} - CREATED")
-
         if payment_id == "":
             response.message = "could not create payment"
             raise Exception(response.message)
+        logger.info(f"{payment_uuid} - CREATED")
 
         background_tasks.add_task(
             process_payment, payment_id, req.client.host, app.state.db_helper

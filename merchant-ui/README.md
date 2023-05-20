@@ -1,43 +1,91 @@
-# Bank Simulator
+# Merchant UI
 
-This is a simple **Acquiring Bank** simulator. It comes with some **Shoppers** in memory and uses them to decide upon payment requests.
+It is a React App to play with requests created by **Merchants**. It is intended to be a sandbox for creating payments and checking their statuses.
 
-There are two endpoints exposed over HTTP:
+It has some hard coded shoppers and it is useful to test the **Payment Gateway** from the perspective of a **Merchant**.
 
-- `POST /payment HTTP/1.1` to create a payment.
-- `PUT /payment HTTP/1.1` only for testing, allows the background task that processes payments to pretend it is receiving an acknowledge message from the **Payment Gateway**.
+The App is very naïve, the code is quite messy, and there is no unit testing yet.
 
-## Testing
+## Overview
 
-Please run it as follows:
+Login Page:
 
-```bash
-$ uvicorn main:app --reload
-```
+![Login](../images/merchant-ui-login.png)
 
-Then please try to request a payment:
+Dashboard:
 
-```bash
-$ curl -H "Content-Type: application/json" -X POST -d @data/request.json http://127.0.0.1:8000/payment
-{"id":"5bd5aa5a-f5e4-11ed-84f9-8c859093fdeb","success":true,"message":"payment request created"}
-```
+![Login](../images/merchant-ui-dashboard.png)
 
-In the stdout, something similar to this will be printed:
+## Hard coded **Shoppers**
 
-```
-INFO:     [2023-05-19 02:32:57] create_payment: 1541d784-f5e5-11ed-8a90-8c859093fdeb - CREATED
-INFO:     [2023-05-19 02:32:57] create_payment: 1541d784-f5e5-11ed-8a90-8c859093fdeb - PENDING
-INFO:     127.0.0.1:62857 - "POST /payment HTTP/1.1" 201 Created
-INFO:     [2023-05-19 02:32:57] update_payment: acknowledging message: (1541d784-f5e5-11ed-8a90-8c859093fdeb, success)
-INFO:     127.0.0.1:62858 - "PUT /payment HTTP/1.1" 200 OK
-INFO:     [2023-05-19 02:32:57] process_payment: 1541d784-f5e5-11ed-8a90-8c859093fdeb - SUCCESS
+```json
+[
+    {
+        "id": 0,
+        "name": "shopper 0",
+        "card": {
+            "number": "1111-2222-3333-4444",
+            "name": "shopper 0",
+            "expire_month": 10,
+            "expire_year": 2050,
+            "cvv": 123
+        },
+        "display": "shopper 0 - ****-****-****-4444"
+    },
+    {
+        "id": 1,
+        "name": "shopper 1",
+        "card": {
+            "number": "5555-6666-7777-8888",
+            "name": "shopper 1",
+            "expire_month": 10,
+            "expire_year": 2040,
+            "cvv": 456
+        },
+        "display": "shopper 1 - ****-****-****-8888"
+    },
+    {
+        "id": 2,
+        "name": "shopper 2",
+        "card": {
+            "number": "9999-1010-1111-1212",
+            "name": "shopper 2",
+            "expire_month": 3,
+            "expire_year": 2045,
+            "cvv": 789
+        },
+        "display": "shopper 2 - ****-****-****-1212"
+    },
+    {
+        "id": 4,
+        "name": "shopper 4",
+        "card": {
+            "number": "1313-1414-1515-1616",
+            "name": "shopper 5",
+            "expire_month": 1,
+            "expire_year": 2070,
+            "cvv": 987
+        },
+        "display": "shopper 4 - ****-****-****-1616"
+    },
+    {
+        "id": 5,
+        "name": "shopper 5",
+        "card": {
+            "number": "1717-1818-1919-2020",
+            "name": "shopper 5",
+            "expire_month": 1,
+            "expire_year": 2070,
+            "cvv": 987
+        },
+        "display": "shopper 5 - ****-****-****-2020"
+    }
+]
 ```
 
 ## **Acquiring Bank** configuration
 
 It will determine if a **Shopper** matches a given card, if they authorized a given **Merchant**, if it has enough balance, if the currency is correct, and so on.
-
-The content is stored in `data/shoppers.json`, but for simplicity:
 
 ```json
 [
