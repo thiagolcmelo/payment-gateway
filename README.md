@@ -18,7 +18,7 @@ A choice in favor of consistency is made along all the aspects described below. 
 
 ### Exposure
 
-The **Payment Gateway** is envisioned as a REST API acessible to two different networks:
+The **Payment Gateway** is envisioned as an API acessible to two different networks:
 
 - **public internet**: the medium through which merchants can connect to it.
 - **bank vpn**: a safe and secure connection with the **Acquiring Bank**.
@@ -36,7 +36,7 @@ It provides 4 endpoints:
   - returns the payment id if the request was successful;
   - it will not inform whether the payment itself was successful or not just yet;
   - acessible to the **public internet**.
-- `GET /payment HTTP/1.1` used by a **Merchant**'s system to request the status of a payment (acessible to the **public internet**).
+- `GET /payment/{id} HTTP/1.1` used by a **Merchant**'s system to request the status of a payment (acessible to the **public internet**).
 - `PUT /payment HTTP/1.1`:
   - used by the **Acquiring Bank** to inform whether a payment was successful or not after its verification with the **Shopper**;
   - if the **Acquiring Bank** doesn't receive a successful response for this request, it should retry, suspend, or cancel the operation on its end;
@@ -104,3 +104,27 @@ Finally, there is test data (`/data`) and a simple UI (`/ui`), where it is possi
 
 ## Testing
 
+There are directives for testing individual components in their folders:
+
+- [Merchant Service](merchant/README.md)
+- [Rate Limiter Service](ratelimiter/README.md)
+- [Ledger Service](ledger/README.md)
+- [Bank Simulator](bank/README.md)
+- [Payment API](api/README.md)
+- [Merchant UI](merchant-ui/README.md)
+
+### Local testing
+
+For local testing, there is a script called `local_test.sh` in the root folder. It will run all services locally, without much trouble, and will make the Merchat UI acessible at `http://localhost:3000/`.
+
+```bash
+$ chmod +x local_test.sh && ./local_test.sh
+```
+
+### Docker Compose testing
+
+There is a Docker Compose for launching the whole system as well (`docker-compose.yaml`).
+
+```bash
+$ docker-compose up
+```
