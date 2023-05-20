@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -19,10 +21,11 @@ import (
 )
 
 var (
-	port         = flag.Int("port", 50052, "The server port")
-	ipFamily     = flag.Int("ip-family", 6, "6 to IPv6, 4 to IPv4")
-	merchantIP   = flag.String("merchant-ip", "::1", "Merchant Service IP Address")
-	merchantPort = flag.Int("merchant-port", 50051, "Merchant Service Port")
+	portFlag         = flag.Int("port", 50052, "The server port")
+	hostFlag         = flag.String("host", "0.0.0.0", "The server host")
+	ipVersionFlag    = flag.Int("ip-version", 4, "The server ip version (4 for IPv4, 6 for IPv6)")
+	merchantHostFlag = flag.String("merchant-host", "0.0.0.0", "Merchant Service host")
+	merchantPortFlag = flag.Int("merchant-port", 50051, "Merchant Service port")
 )
 
 type client struct {
@@ -102,32 +105,50 @@ func (s *server) Allow(ctx context.Context, req *pb.AllowRequest) (*pb.AllowResp
 }
 
 func main() {
-	flag.Parse()
+	var host string
+	var port int
+	var ipVersion int
+	var merchantHost string
+	var merchantPort int
 
-	if port == nil || ipFamily == nil || merchantIP == nil || merchantPort == nil {
-		log.Fatal("requires port, ip-family, merchant-ip, and merchant-port")
+	// prefer environment variables over flags
+	envHost := os.Getenv("SERVICE_HOST")
+	envPort := os.Getenv("SERVICE_PORT")
+	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
+	envMerchantHost := os.Getenv("MERCHANT_SERVICE_HOST")
+	envMerchantPort := os.Getenv("MERCHANT_SERVICE_PORT")
+	if envHost != "" && envPort != "" && envIpVersion != "" && envMerchantHost != "" && envMerchantPort != "" {
+		host = envHost
+		port, _ = strconv.Atoi(envPort)
+		ipVersion, _ = strconv.Atoi(envIpVersion)
+		merchantHost = envMerchantHost
+		merchantPort, _ = strconv.Atoi(envMerchantPort)
+	} else {
+		flag.Parse()
+		host = *hostFlag
+		port = *portFlag
+		ipVersion = *ipVersionFlag
+		merchantHost = *merchantHostFlag
+		merchantPort = *merchantPortFlag
 	}
 
-	// Set up a connection to the gRPC server
-	var merchantAddress string
-	switch *ipFamily {
-	case 6:
-		merchantAddress = fmt.Sprintf("[%s]:%d", *merchantIP, *merchantPort)
-	case 4:
-		merchantAddress = fmt.Sprintf("%s:%d", *merchantIP, *merchantPort)
-	default:
-		log.Fatalf("invalid ip version: %d", *ipFamily)
+	if ipVersion == 6 {
+		host = fmt.Sprintf("[%s]", host)
+		merchantHost = fmt.Sprintf("[%s]", merchantHost)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	address := fmt.Sprintf("%s:%d", host, port)
+	merchantAddress := fmt.Sprintf("%s:%d", merchantHost, merchantPort)
+
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterRateLimiterServiceServer(s, newServerWithMemoryLimiter(merchantAddress))
 	reflection.Register(s)
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+	log.Printf("server listening at %v", listener.Addr())
+	if err := s.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"strconv"
 
 	"github.com/google/uuid"
 	entity "github.com/thiagolcmelo/payment-gateway/ledger/entities"
@@ -17,7 +19,9 @@ import (
 )
 
 var (
-	port = flag.Int("port", 50053, "The server port")
+	portFlag      = flag.Int("port", 50053, "The server port")
+	hostFlag      = flag.String("host", "0.0.0.0", "The server host")
+	ipVersionFlag = flag.Int("ip-version", 4, "The server ip version (4 for IPv4, 6 for IPv6)")
 )
 
 type server struct {
@@ -254,8 +258,30 @@ func (s *server) UpdatePaymentToFail(ctx context.Context, req *pb.UpdatePaymentT
 }
 
 func main() {
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	var host string
+	var port int
+	var ipVersion int
+
+	// prefer environment variables over flags
+	envHost := os.Getenv("SERVICE_HOST")
+	envPort := os.Getenv("SERVICE_PORT")
+	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
+	if envHost != "" && envPort != "" && envIpVersion != "" {
+		host = envHost
+		port, _ = strconv.Atoi(envPort)
+		ipVersion, _ = strconv.Atoi(envIpVersion)
+	} else {
+		flag.Parse()
+		host = *hostFlag
+		port = *portFlag
+		ipVersion = *ipVersionFlag
+	}
+
+	if ipVersion == 6 {
+		host = fmt.Sprintf("[%s]", host)
+	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

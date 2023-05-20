@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 
 	"github.com/google/uuid"
 	entity "github.com/thiagolcmelo/payment-gateway/merchant/entities"
@@ -20,7 +21,9 @@ import (
 )
 
 var (
-	port = flag.Int("port", 50051, "The server port")
+	portFlag      = flag.Int("port", 50051, "The server port")
+	hostFlag      = flag.String("host", "0.0.0.0", "The server host")
+	ipVersionFlag = flag.Int("ip-version", 4, "The server ip version (4 for IPv4, 6 for IPv6)")
 )
 
 func generateMemoryStorage() *memory.Storage {
@@ -150,16 +153,41 @@ func (s *server) FindMerchant(ctx context.Context, req *pb.FindMerchantRequest) 
 }
 
 func main() {
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+
+	var host string
+	var port int
+	var ipVersion int
+
+	// prefer environment variables over flags
+	envHost := os.Getenv("SERVICE_HOST")
+	envPort := os.Getenv("SERVICE_PORT")
+	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
+	if envHost != "" && envPort != "" && envIpVersion != "" {
+		host = envHost
+		port, _ = strconv.Atoi(envPort)
+		ipVersion, _ = strconv.Atoi(envIpVersion)
+	} else {
+		flag.Parse()
+		host = *hostFlag
+		port = *portFlag
+		ipVersion = *ipVersionFlag
+	}
+
+	if ipVersion == 6 {
+		host = fmt.Sprintf("[%s]", host)
+	}
+
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
 	pb.RegisterMerchantServiceServer(s, newServerWithMemoryStorage())
 	reflection.Register(s)
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+	log.Printf("server listening at %v", listener.Addr())
+
+	if err := s.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

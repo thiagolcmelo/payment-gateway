@@ -1,0 +1,72 @@
+version: '3'
+services:
+  merchant-service:
+    build: ./merchant
+    ports:
+      - "50051:50051"
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=50051
+      - SERVICE_IP_VERSION=4
+    networks:
+      - internalnetwork
+
+  rate-limiter-service:
+    build: ./ratelimiter
+    ports:
+      - "50052:50052"
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=50052
+      - SERVICE_IP_VERSION=4
+      - MERCHANT_SERVICE_HOST=merchant-service
+      - MERCHANT_SERVICE_PORT=50051
+    networks:
+      - internalnetwork
+
+  ledger-service:
+    build: ./ledger
+    ports:
+      - "50053:50053"
+    environment:
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=50053
+      - SERVICE_IP_VERSION=4
+    networks:
+      - internalnetwork
+
+  # bank-simulator-service:
+  #   build: ./bank-simulator-service
+  #   expose:
+  #     - "8000"
+  #   networks:
+  #     - banknetwork
+
+  # payment-api-service:
+  #   build: ./payment-api-service
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - internalnetwork
+  #     - externalnetwork
+  #     - banknetwork
+
+  # merchant-ui-service:
+  #   build: ./merchant-ui-service
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - externalnetwork
+
+networks:
+  externalnetwork:
+
+  internalnetwork:
+    ipam:
+        driver: default
+        config:
+          - subnet: 172.20.20.0/29
+    # internal: true
+
+  banknetwork:
+    internal: true

@@ -43,7 +43,7 @@ $ go tool cover -func=coverage.out
 The service can be exposed through gRPC:
 
 ```bash
-$ go run main.go --port 50051
+$ go run main.go --ip-version=4 --host=0.0.0.0 --port=50051
 ```
 
 In a different terminal, please use the [grpcurl](https://github.com/fullstorydev/grpcurl) tool to verify that the endpoints are working as expected.
