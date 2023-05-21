@@ -21,14 +21,14 @@ In a different terminal, please use the [grpcurl](https://github.com/fullstoryde
 - **Merchant with MaxQPS>0**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50052" ratelimiter.RateLimiterService/Allow | jq .allow
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50052" ratelimiter.RateLimiterService/Allow | jq .allow
 true
 ```
 
 - **Merchant with MaxQPS=0**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "84a8cb14-0e7b-43f5-8ec7-0840147d3d47"}' "[::1]:50052" ratelimiter.RateLimiterService/Allow | jq .allow
+$ grpcurl -plaintext -d '{"id": "84a8cb14-0e7b-43f5-8ec7-0840147d3d47"}' "0.0.0.0:50052" ratelimiter.RateLimiterService/Allow | jq .allow
 null
 ```
 
@@ -37,7 +37,7 @@ null
 Merchant `6c1285c2-f09e-4a9b-8a6c-4d94695c1a15` has `MaxQPS=10`:
 
 ```bash
-$ seq 1 20 | xargs -P $(sysctl hw.logicalcpu | cut -d" " -f2) -I % grpcurl -plaintext -d '{"id": "6c1285c2-f09e-4a9b-8a6c-4d94695c1a15"}' "[::1]:50052" ratelimiter.RateLimiterService/Allow | jq .allow
+$ seq 1 20 | xargs -P $(sysctl hw.logicalcpu | cut -d" " -f2) -I % grpcurl -plaintext -d '{"id": "6c1285c2-f09e-4a9b-8a6c-4d94695c1a15"}' "0.0.0.0:50052" ratelimiter.RateLimiterService/Allow | jq .allow
 true
 true
 true
@@ -63,15 +63,15 @@ null
 - **Merchant Service offline - merchant in memory**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50052" ratelimiter.RateLimiterService/Allow | jq .allow
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50052" ratelimiter.RateLimiterService/Allow | jq .allow
 true
 ```
 
 - **Merchant Service offline - merchant not in memory**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "54c5b126-9a3b-4ecc-9590-e8bc5e9bd069"}' "[::1]:50052" ratelimiter.RateLimiterService/Allow | jq .allow
+$ grpcurl -plaintext -d '{"id": "54c5b126-9a3b-4ecc-9590-e8bc5e9bd069"}' "0.0.0.0:50052" ratelimiter.RateLimiterService/Allow | jq .allow
 ERROR:
   Code: Unknown
-  Message: error reading max qps: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp [::1]:50051: connect: connection refused"
+  Message: error reading max qps: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 0.0.0.0:50051: connect: connection refused"
 ```

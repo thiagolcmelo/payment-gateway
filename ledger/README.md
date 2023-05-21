@@ -58,7 +58,7 @@ These tests should later be automated as integrations tests, but for now please 
 - **Create a valid payment**
 
 ```bash
-$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2099, "cvv": 123}, "metadata": "shopper:123"}' "[::1]:50053" ledger.LedgerService/CreatePayment
+$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2099, "cvv": 123}, "metadata": "shopper:123"}' "0.0.0.0:50053" ledger.LedgerService/CreatePayment
 {
   "id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"
 }
@@ -67,7 +67,7 @@ $ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6",
 - **Create an invalid payment - negative amount**
 
 ```bash
-$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": -150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2099, "cvv": 123}, "metadata": "shopper:123"}' "[::1]:50053" ledger.LedgerService/CreatePayment
+$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": -150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2099, "cvv": 123}, "metadata": "shopper:123"}' "0.0.0.0:50053" ledger.LedgerService/CreatePayment
 ERROR:
   Code: Unknown
   Message: negative amount
@@ -76,7 +76,7 @@ ERROR:
 - **Create an invalid payment - card expired**
 
 ```bash
-$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2020, "cvv": 123}, "metadata": "shopper:123"}' "[::1]:50053" ledger.LedgerService/CreatePayment
+$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2020, "cvv": 123}, "metadata": "shopper:123"}' "0.0.0.0:50053" ledger.LedgerService/CreatePayment
 ERROR:
   Code: Unknown
   Message: invalid expiration
@@ -85,7 +85,7 @@ ERROR:
 - **Read existing payment**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:50053" ledger.LedgerService/ReadPayment
+$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "0.0.0.0:50053" ledger.LedgerService/ReadPayment
 {
   "payment": {
     "id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7",
@@ -112,7 +112,7 @@ $ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:
 - **Read unexisting payment**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50053" ledger.LedgerService/ReadPayment
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50053" ledger.LedgerService/ReadPayment
 ERROR:
   Code: Unknown
   Message: there is no payment with given id
@@ -121,14 +121,14 @@ ERROR:
 - **Update payment to pending**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_request_time_utc": "2023-05-18T05:01:10.000"}' "[::1]:50053" ledger.LedgerService/UpdatePaymentToPending
+$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_request_time_utc": "2023-05-18T05:01:10.000"}' "0.0.0.0:50053" ledger.LedgerService/UpdatePaymentToPending
 {
 
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:50053" ledger.LedgerService/ReadPayment
+$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "0.0.0.0:50053" ledger.LedgerService/ReadPayment
 {
   "payment": {
     "id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7",
@@ -156,14 +156,14 @@ $ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:
 - **Update payment to success**
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "success"}' "[::1]:50053" ledger.LedgerService/UpdatePaymentToSuccess
+$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "success"}' "0.0.0.0:50053" ledger.LedgerService/UpdatePaymentToSuccess
 {
 
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:50053" ledger.LedgerService/ReadPayment
+$ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "0.0.0.0:50053" ledger.LedgerService/ReadPayment
 {
   "payment": {
     "id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7",
@@ -192,21 +192,21 @@ $ grpcurl -plaintext -d '{"id": "35947b97-1cf3-4f5c-aa23-3ee0b9734ff7"}' "[::1]:
 - **Update payment to fail**
 
 ```bash
-$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2029, "cvv": 123}, "metadata": "shopper:123"}' "[::1]:50053" ledger.LedgerService/CreatePayment
+$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2029, "cvv": 123}, "metadata": "shopper:123"}' "0.0.0.0:50053" ledger.LedgerService/CreatePayment
 {
   "id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf"
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "could not reach shopper"}' "[::1]:50053" ledger.LedgerService/UpdatePaymentToFail
+$ grpcurl -plaintext -d '{"id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "could not reach shopper"}' "0.0.0.0:50053" ledger.LedgerService/UpdatePaymentToFail
 {
 
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf"}' "[::1]:50053" ledger.LedgerService/ReadPayment
+$ grpcurl -plaintext -d '{"id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf"}' "0.0.0.0:50053" ledger.LedgerService/ReadPayment
 {
   "payment": {
     "id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf",
@@ -235,21 +235,21 @@ $ grpcurl -plaintext -d '{"id": "dbb2c818-ec5f-4dac-ad2a-a6b021c981bf"}' "[::1]:
 - **Read using bank payment id**
 
 ```bash
-$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2029, "cvv": 123}, "metadata": "shopper:123"}' "[::1]:50053" ledger.LedgerService/CreatePayment
+$ grpcurl -plaintext -d '{"merchant_id": "e1211351-bb91-441f-9ea0-3b243189dec6", "amount": 150.0, "currency": "USD", "purchase_time_utc": "2023-05-18T05:00:10.000", "validation_method": "sms", "card": {"number": "1111-2222-3333-4444", "name": "name surname", "expire_month": 10, "expire_year": 2029, "cvv": 123}, "metadata": "shopper:123"}' "0.0.0.0:50053" ledger.LedgerService/CreatePayment
 {
   "id": "ac5503cc-3018-4484-90e1-0bcc64c91f63"
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "ac5503cc-3018-4484-90e1-0bcc64c91f63", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "success"}' "[::1]:50053" ledger.LedgerService/UpdatePaymentToSuccess
+$ grpcurl -plaintext -d '{"id": "ac5503cc-3018-4484-90e1-0bcc64c91f63", "bank_payment_id": "70580f0a-8478-4aba-8ccf-3de1e1df665c", "bank_response_time_utc": "2023-05-18T05:02:10.000", "bank_message": "success"}' "0.0.0.0:50053" ledger.LedgerService/UpdatePaymentToSuccess
 {
 
 }
 ```
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "70580f0a-8478-4aba-8ccf-3de1e1df665c"}' "[::1]:50053" ledger.LedgerService/ReadPaymentUsingBankReference
+$ grpcurl -plaintext -d '{"id": "70580f0a-8478-4aba-8ccf-3de1e1df665c"}' "0.0.0.0:50053" ledger.LedgerService/ReadPaymentUsingBankReference
 {
   "payment": {
     "id": "ac5503cc-3018-4484-90e1-0bcc64c91f63",

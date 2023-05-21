@@ -53,7 +53,7 @@ In a different terminal, please use the [grpcurl](https://github.com/fullstoryde
 - Existing merchant:
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50051" merchant.MerchantService/GetMerchant | jq .
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50051" merchant.MerchantService/GetMerchant | jq .
 {
   "id": "e1211351-bb91-441f-9ea0-3b243189dec6",
   "username": "merchant0",
@@ -67,7 +67,7 @@ $ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:
 - Non existing merchant
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "[::1]:50051" merchant.MerchantService/GetMerchant | jq .
+$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "0.0.0.0:50051" merchant.MerchantService/GetMerchant | jq .
 ERROR:
   Code: Unknown
   Message: id does not match any merchant
@@ -78,7 +78,7 @@ ERROR:
 - Existing merchant:
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50051" merchant.MerchantService/GetQPS | jq .
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50051" merchant.MerchantService/GetQPS | jq .
 {
   "maxQps": 100
 }
@@ -87,7 +87,7 @@ $ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:
 - Non existing merchant
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "[::1]:50051" merchant.MerchantService/GetQPS | jq .
+$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "0.0.0.0:50051" merchant.MerchantService/GetQPS | jq .
 ERROR:
   Code: Unknown
   Message: id does not match any merchant
@@ -98,7 +98,7 @@ ERROR:
 - Existing merchant:
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:50051" merchant.MerchantService/MerchantActive | jq .
+$ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "0.0.0.0:50051" merchant.MerchantService/MerchantActive | jq .
 {
   "active": true
 }
@@ -107,7 +107,7 @@ $ grpcurl -plaintext -d '{"id": "e1211351-bb91-441f-9ea0-3b243189dec6"}' "[::1]:
 - Non existing merchant
 
 ```bash
-$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "[::1]:50051" merchant.MerchantService/MerchantActive | jq .
+$ grpcurl -plaintext -d '{"id": "00000000-0000-0000-0000-000000000000"}' "0.0.0.0:50051" merchant.MerchantService/MerchantActive | jq .
 ERROR:
   Code: Unknown
   Message: id does not match any merchant
@@ -118,7 +118,7 @@ ERROR:
 - Correct username and password:
 
 ```bash
-$ grpcurl -plaintext -d '{"username": "merchant0", "password": "password0"}' "[::1]:50051" merchant.MerchantService/FindMerchant | jq .
+$ grpcurl -plaintext -d '{"username": "merchant0", "password": "password0"}' "0.0.0.0:50051" merchant.MerchantService/FindMerchant | jq .
 {
   "exists": true,
   "id": "63e9f8ed-eb67-4448-8448-6b58ec47248d"
@@ -128,13 +128,13 @@ $ grpcurl -plaintext -d '{"username": "merchant0", "password": "password0"}' "[:
 - Correct username and wrong password:
 
 ```bash
-$ grpcurl -plaintext -d '{"username": "merchant0", "password": "password0000"}' "[::1]:50051" merchant.MerchantService/FindMerchant | jq .
+$ grpcurl -plaintext -d '{"username": "merchant0", "password": "password0000"}' "0.0.0.0:50051" merchant.MerchantService/FindMerchant | jq .
 {}
 ```
 
 - Invalid username:
 
 ```bash
-$ grpcurl -plaintext -d '{"username": "merchant10", "password": "password0000"}' "[::1]:50051" merchant.MerchantService/FindMerchant | jq .
+$ grpcurl -plaintext -d '{"username": "merchant10", "password": "password0000"}' "0.0.0.0:50051" merchant.MerchantService/FindMerchant | jq .
 {}
 ```
