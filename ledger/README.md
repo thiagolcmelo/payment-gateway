@@ -11,6 +11,30 @@ It is a conceptual Ledger for storing payments. It exposes the following endpoin
 
 The validation of fields is very simple, it is not truly checking credit card number, or currencies. The idea is to get something minimal working, but that can be extended and improved later.
 
+## Data Model
+
+Internally there is an in memory database which is a hash table with all payments keyed by their ids, and an extra hash table to map bank reference ids to the ledger ids. The idea is that the bank will issue an id of its own while processing the payment.
+
+```go
+type Payment struct {
+	ID               uuid.UUID
+	MerchantID       uuid.UUID
+	Amount           float64
+	Currency         string
+	PurchaseTime     time.Time
+	ValidationMethod string
+	Card             CreditCard
+	Metadata         string
+	Status           PaymentStatus
+	BankPaymentID    uuid.UUID
+	BankRequestTime  time.Time
+	BankResponseTime time.Time
+	BankMessage      string
+}
+```
+
+
+
 ## Testing
 
 ### Unit tests

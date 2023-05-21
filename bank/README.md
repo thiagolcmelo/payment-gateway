@@ -2,10 +2,85 @@
 
 This is a simple **Acquiring Bank** simulator. It comes with some **Shoppers** in memory and uses them to decide upon payment requests.
 
-There are two endpoints exposed over HTTP:
+There is one endpoint exposed over HTTP:
 
-- `POST /payment HTTP/1.1` to create a payment.
-- `PUT /payment HTTP/1.1` only for testing, allows the background task that processes payments to pretend it is receiving an acknowledge message from the **Payment Gateway**.
+- `POST /payment HTTP/1.1` to create a payment. If the payload is correct, it will reply with a success message and trigger a background task to process the payment.
+
+The background task will attempt to inform to the **Payment Gateway** if the processing was successful. If it fail in contacting the **Payment Gateway** or if it does not receive a valid reply acknowledging the message, it sets the payment to fail.
+
+The idea is that the payload (please see below) must contain all necessary information to identify a **Shopper**. There is for instance a field `validation_method` to simulate a way to contact the **Shopper** and verify the purchase, for instance **sms**, **push**, **email**, etc. There is very few validation as it is mainly conceptual.
+
+A payment is expected to have the following data:
+
+```json
+{
+    "amount": 10.0,
+    "currency": "USD",
+    "purchase_time": "2023-05-18T10:00:00.000",
+    "validation_method": "sms",
+    "card": {
+        "number": "1111-2222-3333-4444",
+        "name": "shopper 0",
+        "expire_month": 10,
+        "expire_year": 2050,
+        "cvv": 123
+    },
+    "merchant": "Merchant 0 Ltd."
+}
+```
+
+The name of the **Merchant** is used in a *auto approve* mechanism. If the **SHopper** has a **Merchant** among those set to *auto approve*, the payment proceeds.
+
+## Data Model
+
+Internally there is an in memory database with the following structure:
+
+```sql
+CREATE TABLE IF NOT EXISTS shoppers (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    description TEXT,
+    currency TEXT,
+    balance REAL
+);
+
+CREATE TABLE IF NOT EXISTS cards (
+    id INTEGER PRIMARY KEY,
+    number TEXT,
+    name TEXT,
+    expire_month INTEGER,
+    expire_year INTEGER,
+    cvv INTEGER,
+    shopper_id INTEGER,
+    FOREIGN KEY (shopper_id) REFERENCES shoppers(id)
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY,
+    uuid_id TEXT,
+    amount REAL,
+    currency TEXT,
+    purchase_time TEXT,
+    validation_method TEXt,
+    card_id INTEGER,
+    merchant TEXT,
+    shopper_id INTEGER,
+    created_at TEXT,
+    status INTEGER,
+    FOREIGN KEY (card_id) REFERENCES cards(id),
+    FOREIGN KEY (shopper_id) REFERENCES shoppers(id)
+);
+
+CREATE TABLE IF NOT EXISTS auto_approve_merchants (
+    id TEXT PRIMARY KEY,
+    merchant TEXT,
+    shopper_id INTEGER,
+    FOREIGN KEY (shopper_id) REFERENCES shoppers(id)
+)
+```
+
+
+
 
 ## Testing
 
