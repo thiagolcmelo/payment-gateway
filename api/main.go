@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
-	"strings"
+	"os"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,47 +15,66 @@ const (
 )
 
 var (
-	ipFamily           = flag.Int("ip-family", 6, "6 to IPv6, 4 to IPv4")
-	merchantIP         = flag.String("merchant-ip", "::1", "Merchant Service IP Address")
-	merchantPort       = flag.Int("merchant-port", 50051, "Merchant Service Port")
-	rateLimiterIP      = flag.String("rate-limiter-ip", "::1", "Rate Limiter Service IP Address")
-	rateLimiterPort    = flag.Int("rate-limiter-port", 50052, "Rate Limiter Service Port")
-	ledgerIP           = flag.String("ledger-ip", "::1", "Ledger Service IP Address")
-	ledgerPort         = flag.Int("ledger-port", 50053, "Ledger Service Port")
-	bankIP             = flag.String("bank-ip", "127.0.0.1", "Bank IP Address")
-	bankPort           = flag.Int("bank-port", 8000, "Bank Port")
-	merchantAddress    = ""
-	rateLimiterAddress = ""
-	ledgerAddress      = ""
-	bankAddress        = ""
+	ipVersionFlag       = flag.Int("ip-family", 6, "6 to IPv6, 4 to IPv4")
+	hostFlag            = flag.String("host", "0.0.0.0", "Service host address")
+	portFlag            = flag.Int("port", 8080, "Service Port")
+	merchantHostFlag    = flag.String("merchant-host", "0.0.0.0", "Merchant Service host address")
+	merchantPortFlag    = flag.Int("merchant-port", 50051, "Merchant Service Port")
+	rateLimiterHostFlag = flag.String("rate-limiter-host", "0.0.0.0", "Rate Limiter Service host address")
+	rateLimiterPortFlag = flag.Int("rate-limiter-port", 50052, "Rate Limiter Service Port")
+	ledgerHostFlag      = flag.String("ledger-host", "0.0.0.0", "Ledger Service host address")
+	ledgerPortFlag      = flag.Int("ledger-port", 50053, "Ledger Service Port")
+	bankHostFlag        = flag.String("bank-host", "0.0.0.0", "Bank host address")
+	bankPortFlag        = flag.Int("bank-port", 8000, "Bank Port")
+	merchantAddress     string
+	rateLimiterAddress  string
+	ledgerAddress       string
+	bankAddress         string
 )
 
+func getEnvOrFlag[T int | string](env string, flagVal *T, conv func(string) (T, error)) T {
+	if envVal := os.Getenv(env); envVal != "" {
+		v, err := conv(envVal)
+		if err != nil {
+			return *flagVal
+		}
+		return v
+	}
+	return *flagVal
+}
+
 func main() {
-
 	flag.Parse()
-	if ipFamily == nil || merchantIP == nil || merchantPort == nil {
-		log.Fatal("requires ip-family, merchant-ip, and merchant-port")
+
+	var address string
+
+	dummyFunc := func(v string) (string, error) { return v, nil }
+
+	ipVersion := getEnvOrFlag("SERVICE_IP_VERSION", ipVersionFlag, strconv.Atoi)
+	host := getEnvOrFlag("SERVICE_HOST", hostFlag, dummyFunc)
+	port := getEnvOrFlag("SERVICE_PORT", portFlag, strconv.Atoi)
+	merchantHost := getEnvOrFlag("MERCHANT_SERVICE_HOST", merchantHostFlag, dummyFunc)
+	merchantPort := getEnvOrFlag("MERCHANT_SERVICE_PORT", merchantPortFlag, strconv.Atoi)
+	rateLimiterHost := getEnvOrFlag("RATE_LIMITER_SERVICE_HOST", rateLimiterHostFlag, dummyFunc)
+	rateLimiterPort := getEnvOrFlag("RATE_LIMITER_SERVICE_PORT", rateLimiterPortFlag, strconv.Atoi)
+	ledgerHost := getEnvOrFlag("LEDGER_SERVICE_HOST", ledgerHostFlag, dummyFunc)
+	ledgerPort := getEnvOrFlag("LEDGER_SERVICE_PORT", ledgerPortFlag, strconv.Atoi)
+	bankHost := getEnvOrFlag("BANK_SIMULATOR_HOST", bankHostFlag, dummyFunc)
+	bankPort := getEnvOrFlag("BANK_SIMULATOR_PORT", bankPortFlag, strconv.Atoi)
+
+	if ipVersion == 6 {
+		host = fmt.Sprintf("[%s]", host)
+		merchantHost = fmt.Sprintf("[%s]", merchantHost)
+		rateLimiterHost = fmt.Sprintf("[%s]", rateLimiterHost)
+		ledgerHost = fmt.Sprintf("[%s]", ledgerHost)
+		bankHost = fmt.Sprintf("[%s]", bankHost)
 	}
 
-	switch *ipFamily {
-	case 6:
-		merchantAddress = fmt.Sprintf("[%s]:%d", *merchantIP, *merchantPort)
-		rateLimiterAddress = fmt.Sprintf("[%s]:%d", *rateLimiterIP, *rateLimiterPort)
-		ledgerAddress = fmt.Sprintf("[%s]:%d", *ledgerIP, *ledgerPort)
-	case 4:
-		merchantAddress = fmt.Sprintf("%s:%d", *merchantIP, *merchantPort)
-		rateLimiterAddress = fmt.Sprintf("%s:%d", *rateLimiterIP, *rateLimiterPort)
-		ledgerAddress = fmt.Sprintf("%s:%d", *ledgerIP, *ledgerPort)
-
-	default:
-		log.Fatalf("invalid ip version: %d", *ipFamily)
-	}
-
-	// always IPv4
-	bankAddress = fmt.Sprintf("%s:%d", *bankIP, *bankPort)
-	if !strings.HasPrefix(bankAddress, "http://") {
-		bankAddress = fmt.Sprintf("http://%s", bankAddress)
-	}
+	address = fmt.Sprintf("%s:%d", host, port)
+	merchantAddress = fmt.Sprintf("%s:%d", merchantHost, merchantPort)
+	rateLimiterAddress = fmt.Sprintf("%s:%d", rateLimiterHost, rateLimiterPort)
+	ledgerAddress = fmt.Sprintf("%s:%d", ledgerHost, ledgerPort)
+	bankAddress = fmt.Sprintf("http://%s:%d", bankHost, bankPort)
 
 	router := gin.Default()
 
@@ -72,5 +91,5 @@ func main() {
 	router.PUT("/payment", restrictMiddleware, updatePaymentHandler)
 	router.GET("/payment/:id", authMiddleware, rateLimitMiddleware, readPaymentHandler)
 
-	router.Run(":8080")
+	router.Run(address)
 }

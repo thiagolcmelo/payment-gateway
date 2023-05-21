@@ -30,7 +30,10 @@ const Dashboard = ({ onLogout }) => {
     const cur_shopper = hardCodedShoppers.find((s) => s.id === parseInt(shopper));
     const purchate_time = new Date().toISOString().slice(0, -1);
     
-    const url = 'http://127.0.0.1:8080/payment';
+    const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
+    const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
+    const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
+    const url = `${apiBaseUrl}/payment`;
     const data = {
         "amount": parseFloat(amount),
         "currency": currency,
@@ -92,7 +95,12 @@ const Dashboard = ({ onLogout }) => {
         Accept: '*/*',
       },
     };
-    axios.get(`http://127.0.0.1:8080/payment/${submission.id}`, config)
+
+    const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
+    const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
+    const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
+    const url = `${apiBaseUrl}/payment/${submission.id}`;
+    axios.get(url, config)
       .then((response) => {
         const status = response.data.status;
         const bank_message = response.data.bank_message;

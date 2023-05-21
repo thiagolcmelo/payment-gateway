@@ -35,38 +35,60 @@ services:
     networks:
       - internalnetwork
 
-  # bank-simulator-service:
-  #   build: ./bank-simulator-service
-  #   expose:
-  #     - "8000"
-  #   networks:
-  #     - banknetwork
+  bank-simulator:
+    build: ./bank
+    environment:
+      - PAYMENT_GATEWAY_HOST=payment-api-service
+      - PAYMENT_GATEWAY_PORT=8080
+    expose:
+      - "8000"
+    networks:
+      - banknetwork
 
-  # payment-api-service:
-  #   build: ./payment-api-service
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - internalnetwork
-  #     - externalnetwork
-  #     - banknetwork
+  payment-api-service:
+    build: ./api
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICE_IP_VERSION=4
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8080
+      - MERCHANT_SERVICE_HOST=merchant-service
+      - MERCHANT_SERVICE_PORT=50051
+      - RATE_LIMITER_SERVICE_HOST=rate-limiter-service
+      - RATE_LIMITER_SERVICE_PORT=50052
+      - LEDGER_SERVICE_HOST=ledger-service
+      - LEDGER_SERVICE_PORT=50053
+      - BANK_SIMULATOR_HOST=bank-simulator
+      - BANK_SIMULATOR_PORT=8000
+    networks:
+      - internalnetwork
+      - externalnetwork
+      - banknetwork
 
-  # merchant-ui-service:
-  #   build: ./merchant-ui-service
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - externalnetwork
+  merchant-ui-service:
+    build: ./merchant-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - PAYMENT_GATEWAY_HOST=payment-api-service
+      - PAYMENT_GATEWAY_PORT=8080
+    networks:
+      - externalnetwork
 
 networks:
   externalnetwork:
 
   internalnetwork:
     ipam:
-        driver: default
-        config:
-          - subnet: 172.20.20.0/29
+      driver: default
+      config:
+        - subnet: 172.20.20.0/29
     # internal: true
 
   banknetwork:
-    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.21.0/29
+    # internal: true

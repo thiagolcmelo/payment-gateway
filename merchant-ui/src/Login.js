@@ -14,7 +14,10 @@ function Login({ onLogin }) {
     setErrorMessage('');
 
     try {
-      const response = await axios.get('http://127.0.0.1:8080/login', {
+      const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
+      const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
+      const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
+      const response = await axios.get(`${apiBaseUrl}/login`, {
         headers: {
           Authorization: `Basic ${btoa(`${username}:${password}`)}`,
           Accept: '*/*',

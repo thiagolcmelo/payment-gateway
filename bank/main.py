@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response, status
@@ -65,13 +66,15 @@ async def process_payment(payment_id: int, host: str, db_manager: MemoryDB) -> N
         success = False
 
     async with httpx.AsyncClient() as client:
+        host = os.getenv("PAYMENT_GATEWAY_HOST", host)
+        port = os.getenv("PAYMENT_GATEWAY_PORT", 8080)
         json_data = {
             "id": payment.uuid_id,
             "success": success,
             "message": message,
         }
         r = await client.put(
-            f"http://{host}:8080/payment", json=json_data, timeout=10.0
+            f"http://{host}:{port}/payment", json=json_data, timeout=10.0
         )
         r_data = r.json()
 
