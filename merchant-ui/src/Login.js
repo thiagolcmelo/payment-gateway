@@ -4,6 +4,10 @@ import './Login.css';
 
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
+const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
+const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
+const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
+
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -14,9 +18,6 @@ function Login({ onLogin }) {
     setErrorMessage('');
 
     try {
-      const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
-      const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
-      const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
       const response = await axios.get(`${apiBaseUrl}/login`, {
         headers: {
           Authorization: `Basic ${btoa(`${username}:${password}`)}`,

@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './Dashboard.css'; // Import the CSS file for styling
 
+const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
+const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
+const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
+
 const Dashboard = ({ onLogout }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(true); // Replace with your login state logic
   const [shopper, setShopper] = useState('');
@@ -30,9 +34,6 @@ const Dashboard = ({ onLogout }) => {
     const cur_shopper = hardCodedShoppers.find((s) => s.id === parseInt(shopper));
     const purchate_time = new Date().toISOString().slice(0, -1);
     
-    const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
-    const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
-    const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
     const url = `${apiBaseUrl}/payment`;
     const data = {
         "amount": parseFloat(amount),
@@ -96,9 +97,6 @@ const Dashboard = ({ onLogout }) => {
       },
     };
 
-    const paymentGatewayHost = process.env.REACT_APP_PAYMENT_GATEWAY_HOST;
-    const paymentGatewayPort = process.env.REACT_APP_PAYMENT_GATEWAY_PORT;
-    const apiBaseUrl = `http://${paymentGatewayHost}:${paymentGatewayPort}`;
     const url = `${apiBaseUrl}/payment/${submission.id}`;
     axios.get(url, config)
       .then((response) => {

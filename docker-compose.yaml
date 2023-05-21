@@ -1,42 +1,46 @@
 version: '3'
 services:
   merchant-service:
-    build: ./merchant
+    # build: ./merchant
+    image: thiagolcmelo/merchant-service:latest
     ports:
       - "50051:50051"
     environment:
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=50051
-      - SERVICE_IP_VERSION=4
+      - IP_VERSION=4
+      - MERCHANT_SERVICE_HOST=0.0.0.0
+      - MERCHANT_SERVICE_PORT=50051
     networks:
       - internalnetwork
 
   rate-limiter-service:
-    build: ./ratelimiter
+    # build: ./ratelimiter
+    image: thiagolcmelo/rate-limiter-service:latest
     ports:
       - "50052:50052"
     environment:
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=50052
-      - SERVICE_IP_VERSION=4
+      - IP_VERSION=4
+      - RATE_LIMITER_SERVICE_HOST=0.0.0.0
+      - RATE_LIMITER_SERVICE_PORT=50052
       - MERCHANT_SERVICE_HOST=merchant-service
       - MERCHANT_SERVICE_PORT=50051
     networks:
       - internalnetwork
 
   ledger-service:
-    build: ./ledger
+    # build: ./ledger
+    image: thiagolcmelo/ledger-service:latest
     ports:
       - "50053:50053"
     environment:
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=50053
-      - SERVICE_IP_VERSION=4
+      - IP_VERSION=4
+      - LEDGER_SERVICE_HOST=0.0.0.0
+      - LEDGER_SERVICE_PORT=50053
     networks:
       - internalnetwork
 
   bank-simulator:
-    build: ./bank
+    # build: ./bank
+    image: thiagolcmelo/bank-simulator:latest
     environment:
       - PAYMENT_GATEWAY_HOST=payment-api-service
       - PAYMENT_GATEWAY_PORT=8080
@@ -46,13 +50,14 @@ services:
       - banknetwork
 
   payment-api-service:
-    build: ./api
+    # build: ./api
+    image: thiagolcmelo/payment-api-service:latest
     ports:
       - "8080:8080"
     environment:
-      - SERVICE_IP_VERSION=4
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=8080
+      - IP_VERSION=4
+      - PAYMENT_API_SERVICE_HOST=0.0.0.0
+      - PAYMENT_API_SERVICE_PORT=8080
       - MERCHANT_SERVICE_HOST=merchant-service
       - MERCHANT_SERVICE_PORT=50051
       - RATE_LIMITER_SERVICE_HOST=rate-limiter-service
@@ -66,13 +71,14 @@ services:
       - externalnetwork
       - banknetwork
 
-  merchant-ui-service:
-    build: ./merchant-ui
+  merchant-ui:
+    # build: ./merchant-ui
+    image: thiagolcmelo/merchant-ui:latest
     ports:
       - "3000:3000"
     environment:
-      - PAYMENT_GATEWAY_HOST=payment-api-service
-      - PAYMENT_GATEWAY_PORT=8080
+      - REACT_APP_PAYMENT_GATEWAY_HOST=payment-api-service
+      - REACT_APP_PAYMENT_GATEWAY_PORT=8080
     networks:
       - externalnetwork
 
@@ -84,11 +90,11 @@ networks:
       driver: default
       config:
         - subnet: 172.20.20.0/29
-    # internal: true
+    internal: true
 
   banknetwork:
     ipam:
       driver: default
       config:
         - subnet: 172.21.21.0/29
-    # internal: true
+    internal: true

@@ -45,22 +45,22 @@ func getEnvOrFlag[T int | string](env string, flagVal *T, conv func(string) (T, 
 
 func main() {
 	flag.Parse()
-
-	var address string
-
 	dummyFunc := func(v string) (string, error) { return v, nil }
 
-	ipVersion := getEnvOrFlag("SERVICE_IP_VERSION", ipVersionFlag, strconv.Atoi)
-	host := getEnvOrFlag("SERVICE_HOST", hostFlag, dummyFunc)
-	port := getEnvOrFlag("SERVICE_PORT", portFlag, strconv.Atoi)
-	merchantHost := getEnvOrFlag("MERCHANT_SERVICE_HOST", merchantHostFlag, dummyFunc)
-	merchantPort := getEnvOrFlag("MERCHANT_SERVICE_PORT", merchantPortFlag, strconv.Atoi)
-	rateLimiterHost := getEnvOrFlag("RATE_LIMITER_SERVICE_HOST", rateLimiterHostFlag, dummyFunc)
-	rateLimiterPort := getEnvOrFlag("RATE_LIMITER_SERVICE_PORT", rateLimiterPortFlag, strconv.Atoi)
-	ledgerHost := getEnvOrFlag("LEDGER_SERVICE_HOST", ledgerHostFlag, dummyFunc)
-	ledgerPort := getEnvOrFlag("LEDGER_SERVICE_PORT", ledgerPortFlag, strconv.Atoi)
-	bankHost := getEnvOrFlag("BANK_SIMULATOR_HOST", bankHostFlag, dummyFunc)
-	bankPort := getEnvOrFlag("BANK_SIMULATOR_PORT", bankPortFlag, strconv.Atoi)
+	var (
+		address         string
+		ipVersion       int    = getEnvOrFlag("IP_VERSION", ipVersionFlag, strconv.Atoi)
+		host            string = getEnvOrFlag("PAYMENT_API_SERVICE_HOST", hostFlag, dummyFunc)
+		port            int    = getEnvOrFlag("PAYMENT_API_SERVICE_PORT", portFlag, strconv.Atoi)
+		merchantHost    string = getEnvOrFlag("MERCHANT_SERVICE_HOST", merchantHostFlag, dummyFunc)
+		merchantPort    int    = getEnvOrFlag("MERCHANT_SERVICE_PORT", merchantPortFlag, strconv.Atoi)
+		rateLimiterHost string = getEnvOrFlag("RATE_LIMITER_SERVICE_HOST", rateLimiterHostFlag, dummyFunc)
+		rateLimiterPort int    = getEnvOrFlag("RATE_LIMITER_SERVICE_PORT", rateLimiterPortFlag, strconv.Atoi)
+		ledgerHost      string = getEnvOrFlag("LEDGER_SERVICE_HOST", ledgerHostFlag, dummyFunc)
+		ledgerPort      int    = getEnvOrFlag("LEDGER_SERVICE_PORT", ledgerPortFlag, strconv.Atoi)
+		bankHost        string = getEnvOrFlag("BANK_SIMULATOR_HOST", bankHostFlag, dummyFunc)
+		bankPort        int    = getEnvOrFlag("BANK_SIMULATOR_PORT", bankPortFlag, strconv.Atoi)
+	)
 
 	if ipVersion == 6 {
 		host = fmt.Sprintf("[%s]", host)

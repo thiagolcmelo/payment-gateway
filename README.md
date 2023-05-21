@@ -113,7 +113,19 @@ There are directives for testing individual components in their folders:
 - [Payment API](api/README.md)
 - [Merchant UI](merchant-ui/README.md)
 
+### Docker Compose testing
 
+The application can be launched using Docker Compose using the file `docker-compose.yaml`.
+
+```bash
+$ docker-compose up
+```
+
+There is a workaround for the Merchan UI. Some detail related to making environment variables available to the React App being served by Nginx is not correct. The temporary solution is to override the **Payment Gateway** host and port directly in the React files.
+
+### Prerequisites
+
+Before using this application, please ensure that you have Docker and Docker Compose installed on your system. Follow the instructions below to install them:
 
 ### Local testing
 
@@ -122,18 +134,6 @@ For testing locally, there is a script called `local_test.sh` in the root folder
 ```bash
 $ chmod +x local_test.sh && ./local_test.sh
 ```
-
-### Docker Compose testing
-
-There is a Docker Compose for launching the whole system as well (`docker-compose.yaml`).
-
-```bash
-$ docker-compose up
-```
-
-### Prerequisites
-
-Before using this application, please ensure that you have Docker and Docker Compose installed on your system. Follow the instructions below to install them:
 
 #### Docker
 

@@ -152,32 +152,30 @@ func (s *server) FindMerchant(ctx context.Context, req *pb.FindMerchantRequest) 
 	}, nil
 }
 
-func main() {
-
-	var host string
-	var port int
-	var ipVersion int
-
-	// prefer environment variables over flags
-	envHost := os.Getenv("SERVICE_HOST")
-	envPort := os.Getenv("SERVICE_PORT")
-	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
-	if envHost != "" && envPort != "" && envIpVersion != "" {
-		host = envHost
-		port, _ = strconv.Atoi(envPort)
-		ipVersion, _ = strconv.Atoi(envIpVersion)
-	} else {
-		flag.Parse()
-		host = *hostFlag
-		port = *portFlag
-		ipVersion = *ipVersionFlag
+func getEnvOrFlag[T int | string](env string, flagVal *T, conv func(string) (T, error)) T {
+	if envVal := os.Getenv(env); envVal != "" {
+		v, err := conv(envVal)
+		if err != nil {
+			return *flagVal
+		}
+		return v
 	}
+	return *flagVal
+}
+
+func main() {
+	var network string = "tcp4"
+
+	ipVersion := getEnvOrFlag("IP_VERSION", ipVersionFlag, strconv.Atoi)
+	host := getEnvOrFlag("MERCHANT_SERVICE_HOST", hostFlag, func(v string) (string, error) { return v, nil })
+	port := getEnvOrFlag("MERCHANT_SERVICE_PORT", portFlag, strconv.Atoi)
 
 	if ipVersion == 6 {
 		host = fmt.Sprintf("[%s]", host)
+		network = "tcp6"
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+	listener, err := net.Listen(network, fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

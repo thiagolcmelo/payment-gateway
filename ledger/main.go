@@ -257,39 +257,39 @@ func (s *server) UpdatePaymentToFail(ctx context.Context, req *pb.UpdatePaymentT
 	return &pb.UpdatePaymentToFailResponse{}, nil
 }
 
-func main() {
-	var host string
-	var port int
-	var ipVersion int
-
-	// prefer environment variables over flags
-	envHost := os.Getenv("SERVICE_HOST")
-	envPort := os.Getenv("SERVICE_PORT")
-	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
-	if envHost != "" && envPort != "" && envIpVersion != "" {
-		host = envHost
-		port, _ = strconv.Atoi(envPort)
-		ipVersion, _ = strconv.Atoi(envIpVersion)
-	} else {
-		flag.Parse()
-		host = *hostFlag
-		port = *portFlag
-		ipVersion = *ipVersionFlag
+func getEnvOrFlag[T int | string](env string, flagVal *T, conv func(string) (T, error)) T {
+	if envVal := os.Getenv(env); envVal != "" {
+		v, err := conv(envVal)
+		if err != nil {
+			return *flagVal
+		}
+		return v
 	}
+	return *flagVal
+}
+
+func main() {
+	var network string = "tcp4"
+
+	ipVersion := getEnvOrFlag("IP_VERSION", ipVersionFlag, strconv.Atoi)
+	host := getEnvOrFlag("LEDGER_SERVICE_HOST", hostFlag, func(v string) (string, error) { return v, nil })
+	port := getEnvOrFlag("LEDGER_SERVICE_PORT", portFlag, strconv.Atoi)
 
 	if ipVersion == 6 {
 		host = fmt.Sprintf("[%s]", host)
+		network = "tcp6"
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+	listener, err := net.Listen(network, fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
 	pb.RegisterLedgerServiceServer(s, newServerWithMemoryStorage())
 	reflection.Register(s)
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+	log.Printf("server listening at %v", listener.Addr())
+	if err := s.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

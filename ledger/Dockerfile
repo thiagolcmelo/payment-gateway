@@ -17,9 +17,9 @@ COPY . .
 RUN go build -o app
 
 # Set the environment variables
-ENV SERVICE_HOST=0.0.0.0
-ENV SERVICE_PORT=50053
-ENV SERVICE_IP_VERSION=4
+ENV IP_VERSION=4
+ENV LEDGER_SERVICE_HOST=0.0.0.0
+ENV LEDGER_SERVICE_PORT=50053
 
 # Expose the port on which Ledger Service listens
 EXPOSE 50053

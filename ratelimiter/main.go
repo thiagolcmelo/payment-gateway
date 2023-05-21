@@ -104,46 +104,41 @@ func (s *server) Allow(ctx context.Context, req *pb.AllowRequest) (*pb.AllowResp
 	}, err
 }
 
-func main() {
-	var host string
-	var port int
-	var ipVersion int
-	var merchantHost string
-	var merchantPort int
-
-	// prefer environment variables over flags
-	envHost := os.Getenv("SERVICE_HOST")
-	envPort := os.Getenv("SERVICE_PORT")
-	envIpVersion := os.Getenv("SERVICE_IP_VERSION")
-	envMerchantHost := os.Getenv("MERCHANT_SERVICE_HOST")
-	envMerchantPort := os.Getenv("MERCHANT_SERVICE_PORT")
-	if envHost != "" && envPort != "" && envIpVersion != "" && envMerchantHost != "" && envMerchantPort != "" {
-		host = envHost
-		port, _ = strconv.Atoi(envPort)
-		ipVersion, _ = strconv.Atoi(envIpVersion)
-		merchantHost = envMerchantHost
-		merchantPort, _ = strconv.Atoi(envMerchantPort)
-	} else {
-		flag.Parse()
-		host = *hostFlag
-		port = *portFlag
-		ipVersion = *ipVersionFlag
-		merchantHost = *merchantHostFlag
-		merchantPort = *merchantPortFlag
+func getEnvOrFlag[T int | string](env string, flagVal *T, conv func(string) (T, error)) T {
+	if envVal := os.Getenv(env); envVal != "" {
+		v, err := conv(envVal)
+		if err != nil {
+			return *flagVal
+		}
+		return v
 	}
+	return *flagVal
+}
+
+func main() {
+	var (
+		network      string = "tcp4"
+		ipVersion    int    = getEnvOrFlag("IP_VERSION", ipVersionFlag, strconv.Atoi)
+		host         string = getEnvOrFlag("RATE_LIMITER_SERVICE_HOST", hostFlag, func(v string) (string, error) { return v, nil })
+		port         int    = getEnvOrFlag("RATE_LIMITER_SERVICE_PORT", portFlag, strconv.Atoi)
+		merchantHost string = getEnvOrFlag("MERCHANT_SERVICE_HOST", merchantHostFlag, func(v string) (string, error) { return v, nil })
+		merchantPort int    = getEnvOrFlag("MERCHANT_SERVICE_PORT", merchantPortFlag, strconv.Atoi)
+	)
 
 	if ipVersion == 6 {
 		host = fmt.Sprintf("[%s]", host)
 		merchantHost = fmt.Sprintf("[%s]", merchantHost)
+		network = "tcp6"
 	}
 
 	address := fmt.Sprintf("%s:%d", host, port)
 	merchantAddress := fmt.Sprintf("%s:%d", merchantHost, merchantPort)
 
-	listener, err := net.Listen("tcp", address)
+	listener, err := net.Listen(network, address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
 	pb.RegisterRateLimiterServiceServer(s, newServerWithMemoryLimiter(merchantAddress))
 	reflection.Register(s)
