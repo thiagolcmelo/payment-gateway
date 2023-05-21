@@ -100,7 +100,7 @@ There is a 5th directory with a **Acquiring Bank** simulator. It is very simple,
 
 - **Acquiring Bank**: `/bank`
 
-Finally, there is test data (`/data`) and a simple UI (`/ui`), where it is possible to manually submit payment requests on behalf of a fictional **Merchant** and observe the system functioning.
+Finally, there is a simple UI (`/merchant-ui`), where it is possible to manually submit payment requests on behalf of a fictional **Merchant** and observe the system functioning.
 
 ## Testing
 

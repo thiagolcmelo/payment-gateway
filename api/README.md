@@ -14,8 +14,6 @@ $ go run handlers.go middleware.go main.go
 
 If all the other services are running on their default ports, the following commands will permit testing:
 
-***login**
-
 ```bash
 $ curl -u merchant0:password0 http://localhost:8080/login
 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1lcmNoYW50MCIsImlkIjoiZTEyMTEzNTEtYmI5MS00NDFmLTllYTAtM2IyNDMxODlkZWM2IiwiZXhwIjoiMjAyMy0wNS0yMVQwMDowOToyMi4zNDAwNiswMTowMCJ9.lFs4rj02Zolnc0U9tne7rSBXcYMNfb9YQuk4pG0Zmxg"}
