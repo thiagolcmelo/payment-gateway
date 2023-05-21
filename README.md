@@ -113,9 +113,11 @@ There are directives for testing individual components in their folders:
 - [Payment API](api/README.md)
 - [Merchant UI](merchant-ui/README.md)
 
+
+
 ### Local testing
 
-For local testing, there is a script called `local_test.sh` in the root folder. It will run all services locally, without much trouble, and will make the Merchat UI acessible at `http://localhost:3000/`.
+For testing locally, there is a script called `local_test.sh` in the root folder. It will build and run all services. The Merchat UI will be acessible at `http://localhost:3000/`.
 
 ```bash
 $ chmod +x local_test.sh && ./local_test.sh
@@ -128,3 +130,47 @@ There is a Docker Compose for launching the whole system as well (`docker-compos
 ```bash
 $ docker-compose up
 ```
+
+### Prerequisites
+
+Before using this application, please ensure that you have Docker and Docker Compose installed on your system. Follow the instructions below to install them:
+
+#### Docker
+
+1. Visit the Docker website: https://www.docker.com
+2. Select the appropriate Docker edition for your operating system (e.g., Docker Desktop for Windows/Mac, Docker Engine for Linux).
+3. Download the installer and follow the installation instructions provided for your specific operating system.
+4. After installation, verify that Docker is running by opening a terminal/command prompt and executing the following command:
+
+```bash
+$ docker version
+```
+
+You should see version information for both the Docker Engine and Docker Client.
+
+#### Docker Compose
+
+Docker Compose is typically bundled with Docker Desktop for Windows and Mac, so if you've installed Docker Desktop, you should already have Docker Compose. For Linux users or other cases where Docker Compose is not included, follow these steps:
+
+1. Visit the Docker Compose GitHub repository: https://github.com/docker/compose
+2. In the repository's releases section, locate the latest release suitable for your operating system.
+3. Copy the URL of the binary for the relevant release.
+4. Open a terminal/command prompt and execute the following command, replacing <URL> with the URL you copied:
+
+```bash
+$ sudo curl -L "<URL>" -o /usr/local/bin/docker-compose
+```
+
+5. Make the Docker Compose binary executable by running:
+
+```bash
+$ sudo chmod +x /usr/local/bin/docker-compose
+```
+
+6. Verify the installation by executing:
+
+```bash
+$ docker-compose version
+```
+
+You should see version information for Docker Compose.
