@@ -1,6 +1,10 @@
 # Use a GoLang base image
 FROM golang:1.20
 
+# Install ping
+RUN apt-get update
+RUN apt-get install -y inetutils-ping
+
 # Set the working directory inside the container
 WORKDIR /app
 

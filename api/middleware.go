@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -75,10 +76,24 @@ func rateLimitMiddleware(c *gin.Context) {
 	}
 }
 
-func restrictMiddleware(c *gin.Context) {
-	c.Next()
-	// allowedNetwork := "10.123.123.0/30" // Specify the network address and mask
+func restrictMiddleware(ipToEnable string) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
+		if err != nil {
+			log.Printf("error getting client ip: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		log.Printf("ip=%s, expected=%s", ip, ipToEnable)
+		if ip != ipToEnable {
+			log.Printf("unauthorized ip: %s", ip)
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		c.Next()
+	}
 
+	// allowedNetwork := "10.123.123.0/30" // Specify the network address and mask
 	// // Get the client's IP address
 	// ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	// if err != nil {
@@ -86,7 +101,6 @@ func restrictMiddleware(c *gin.Context) {
 	// 	c.AbortWithStatus(http.StatusInternalServerError)
 	// 	return
 	// }
-
 	// // Check if the client's IP is within the allowed network
 	// _, allowedCIDR, err := net.ParseCIDR(allowedNetwork)
 	// if err != nil {

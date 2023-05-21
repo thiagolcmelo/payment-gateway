@@ -3,8 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -76,6 +80,13 @@ func main() {
 	ledgerAddress = fmt.Sprintf("%s:%d", ledgerHost, ledgerPort)
 	bankAddress = fmt.Sprintf("http://%s:%d", bankHost, bankPort)
 
+	bankIP, err := getBankIP()
+	if err != nil {
+		log.Fatalf("could not determine bank ip: %v", err)
+	} else {
+		log.Printf("bank ip: %s", bankIP)
+	}
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -88,8 +99,31 @@ func main() {
 	router.GET("/login", loginHandler)
 
 	router.POST("/payment", authMiddleware, rateLimitMiddleware, createPaymentHandler)
-	router.PUT("/payment", restrictMiddleware, updatePaymentHandler)
+	router.PUT("/payment", restrictMiddleware(bankIP), updatePaymentHandler)
 	router.GET("/payment/:id", authMiddleware, rateLimitMiddleware, readPaymentHandler)
 
 	router.Run(address)
+}
+
+func getBankIP() (string, error) {
+	cmd := exec.Command("ping", "-c", "1", "bank-simulator")
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("error executing command: %v", err)
+		return "", err
+	}
+
+	// Create a regular expression pattern to capture the value within parentheses
+	re := regexp.MustCompile(`PING bank-simulator \(([0-9\.]*)\): [0-9]* data bytes`)
+
+	// Find the first match of the pattern in the output
+	match := re.FindStringSubmatch(string(output))
+
+	if len(match) > 1 {
+		// The captured value is at index 1
+		return strings.TrimSpace(match[1]), nil
+	} else {
+		return "", fmt.Errorf("unable to find bank ip address")
+	}
 }
